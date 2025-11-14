@@ -7,6 +7,7 @@ import com.docpet.animalhospital.repository.UserRepository;
 import com.docpet.animalhospital.security.SecurityUtils;
 import com.docpet.animalhospital.service.dto.OwnerDTO;
 import com.docpet.animalhospital.service.mapper.OwnerMapper;
+import com.docpet.animalhospital.web.rest.errors.BadRequestAlertException;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OwnerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OwnerService.class);
+    private static final String ENTITY_NAME = "owner";
 
     private final OwnerRepository ownerRepository;
     private final OwnerMapper ownerMapper;
@@ -87,9 +89,45 @@ public class OwnerService {
 
     public OwnerDTO update(OwnerDTO ownerDTO) {
         LOG.debug("Request to update Owner : {}", ownerDTO);
-        Owner owner = ownerMapper.toEntity(ownerDTO);
-        owner = ownerRepository.save(owner);
-        return ownerMapper.toDto(owner);
+        
+        // Load owner hiện tại từ database để giữ nguyên user
+        Owner existingOwner = ownerRepository.findById(ownerDTO.getId())
+            .orElseThrow(() -> new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
+        
+        // Lấy user hiện tại
+        User currentUser = SecurityUtils.getCurrentUserLogin()
+            .flatMap(login -> userRepository.findOneByLogin(login.toLowerCase()))
+            .orElse(null);
+        
+        // Nếu owner chưa có user, tự động set user hiện tại
+        if (existingOwner.getUser() == null && currentUser != null) {
+            existingOwner.setUser(currentUser);
+            LOG.debug("Set user {} to owner {}", currentUser.getLogin(), existingOwner.getId());
+        }
+        
+        // Update các field từ DTO
+        if (ownerDTO.getName() != null && !ownerDTO.getName().trim().isEmpty()) {
+            existingOwner.setName(ownerDTO.getName());
+        } else if (ownerDTO.getFirstName() != null || ownerDTO.getLastName() != null) {
+            // Combine firstName và lastName
+            String firstName = ownerDTO.getFirstName() != null ? ownerDTO.getFirstName().trim() : "";
+            String lastName = ownerDTO.getLastName() != null ? ownerDTO.getLastName().trim() : "";
+            if (!firstName.isEmpty() || !lastName.isEmpty()) {
+                existingOwner.setName((firstName + " " + lastName).trim());
+            }
+        }
+        
+        if (ownerDTO.getPhone() != null) {
+            existingOwner.setPhone(ownerDTO.getPhone());
+        }
+        if (ownerDTO.getAddress() != null) {
+            existingOwner.setAddress(ownerDTO.getAddress());
+        }
+        
+        // Giữ nguyên user (nếu đã có) hoặc đã set ở trên
+        
+        Owner savedOwner = ownerRepository.save(existingOwner);
+        return ownerMapper.toDto(savedOwner);
     }
 
     public Optional<OwnerDTO> partialUpdate(OwnerDTO ownerDTO) {
