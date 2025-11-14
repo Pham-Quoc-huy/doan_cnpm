@@ -5,10 +5,13 @@ import com.docpet.animalhospital.repository.UserRepository;
 import com.docpet.animalhospital.security.AuthoritiesConstants;
 import com.docpet.animalhospital.security.SecurityUtils;
 import com.docpet.animalhospital.service.AppointmentActionService;
+import com.docpet.animalhospital.service.AppointmentMessageService;
 import com.docpet.animalhospital.service.AppointmentService;
 import com.docpet.animalhospital.service.dto.AppointmentActionDTO;
+import com.docpet.animalhospital.service.dto.AppointmentMessageDTO;
 import com.docpet.animalhospital.service.dto.AppointmentDTO;
 import com.docpet.animalhospital.web.rest.errors.BadRequestAlertException;
+import com.docpet.animalhospital.web.rest.vm.SendMessageVM;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
@@ -34,17 +37,20 @@ public class AppointmentResource {
     private final AppointmentService appointmentService;
     private final AppointmentRepository appointmentRepository;
     private final AppointmentActionService appointmentActionService;
+    private final AppointmentMessageService appointmentMessageService;
     private final UserRepository userRepository;
 
     public AppointmentResource(
         AppointmentService appointmentService,
         AppointmentRepository appointmentRepository,
         AppointmentActionService appointmentActionService,
+        AppointmentMessageService appointmentMessageService,
         UserRepository userRepository
     ) {
         this.appointmentService = appointmentService;
         this.appointmentRepository = appointmentRepository;
         this.appointmentActionService = appointmentActionService;
+        this.appointmentMessageService = appointmentMessageService;
         this.userRepository = userRepository;
     }
 
@@ -167,43 +173,21 @@ public class AppointmentResource {
         return ResponseEntity.ok().body(appointmentDTO);
     }
 
-    @GetMapping("/emergency")
-    public ResponseEntity<List<AppointmentDTO>> getEmergencyAppointmentsByDate(
-        @RequestParam(value = "date", required = false) String date) {
-        LOG.debug("REST request to get emergency appointments for date: {}", date);
-        List<AppointmentDTO> appointments = appointmentService.getEmergencyAppointmentsByDate(date);
-        return ResponseEntity.ok().body(appointments);
-    }
-
     @GetMapping("/regular")
-    public ResponseEntity<List<AppointmentDTO>> getRegularAppointmentsByDate(
-        @RequestParam(value = "date", required = false) String date) {
-        LOG.debug("REST request to get regular appointments for date: {}", date);
-        List<AppointmentDTO> appointments = appointmentService.getRegularAppointmentsByDate(date);
+    public ResponseEntity<List<AppointmentDTO>> getRegularAppointmentsByDateAndVetId(
+        @RequestParam("date") String date,
+        @RequestParam("vetId") Long vetId) {
+        LOG.debug("REST request to get regular appointments for date: {} and vetId: {}", date, vetId);
+        List<AppointmentDTO> appointments = appointmentService.getRegularAppointmentsByDateAndVetId(date, vetId);
         return ResponseEntity.ok().body(appointments);
     }
 
-    @GetMapping("/vet/emergency")
-    @PreAuthorize("hasAuthority('" + AuthoritiesConstants.DOCTOR + "')")
-    public ResponseEntity<List<AppointmentDTO>> getEmergencyAppointmentsByDateForVet(
-        @RequestParam(value = "date", required = false) String date) {
-        LOG.debug("REST request to get emergency appointments for date: {} for current vet", date);
-        String currentUserLogin = SecurityUtils.getCurrentUserLogin()
-            .orElseThrow(() -> new BadRequestAlertException("User not authenticated", ENTITY_NAME, "noauth"));
-        
-        List<AppointmentDTO> appointments = appointmentService.getEmergencyAppointmentsByDateForVet(date, currentUserLogin);
-        return ResponseEntity.ok().body(appointments);
-    }
-
-    @GetMapping("/vet/regular")
-    @PreAuthorize("hasAuthority('" + AuthoritiesConstants.DOCTOR + "')")
-    public ResponseEntity<List<AppointmentDTO>> getRegularAppointmentsByDateForVet(
-        @RequestParam(value = "date", required = false) String date) {
-        LOG.debug("REST request to get regular appointments for date: {} for current vet", date);
-        String currentUserLogin = SecurityUtils.getCurrentUserLogin()
-            .orElseThrow(() -> new BadRequestAlertException("User not authenticated", ENTITY_NAME, "noauth"));
-        
-        List<AppointmentDTO> appointments = appointmentService.getRegularAppointmentsByDateForVet(date, currentUserLogin);
+    @GetMapping("/emergency")
+    public ResponseEntity<List<AppointmentDTO>> getEmergencyAppointmentsByDateAndVetId(
+        @RequestParam("date") String date,
+        @RequestParam("vetId") Long vetId) {
+        LOG.debug("REST request to get emergency appointments for date: {} and vetId: {}", date, vetId);
+        List<AppointmentDTO> appointments = appointmentService.getEmergencyAppointmentsByDateAndVetId(date, vetId);
         return ResponseEntity.ok().body(appointments);
     }
 
@@ -270,6 +254,33 @@ public class AppointmentResource {
         );
 
         return ResponseEntity.ok().body(actions);
+    }
+
+    @PostMapping("/{id}/messages")
+    public ResponseEntity<AppointmentMessageDTO> sendMessage(
+        @PathVariable("id") Long appointmentId,
+        @Valid @RequestBody SendMessageVM sendMessageVM
+    ) {
+        LOG.debug("REST request to send message for appointment: {}", appointmentId);
+        String currentUserLogin = SecurityUtils.getCurrentUserLogin()
+            .orElseThrow(() -> new BadRequestAlertException("User not authenticated", ENTITY_NAME, "noauth"));
+        
+        AppointmentMessageDTO messageDTO = appointmentMessageService.createMessage(
+            appointmentId, 
+            sendMessageVM.getMessage(), 
+            currentUserLogin
+        );
+        return ResponseEntity.ok().body(messageDTO);
+    }
+
+    @GetMapping("/{id}/messages")
+    public ResponseEntity<List<AppointmentMessageDTO>> getMessages(@PathVariable("id") Long appointmentId) {
+        LOG.debug("REST request to get messages for appointment: {}", appointmentId);
+        String currentUserLogin = SecurityUtils.getCurrentUserLogin()
+            .orElseThrow(() -> new BadRequestAlertException("User not authenticated", ENTITY_NAME, "noauth"));
+        
+        List<AppointmentMessageDTO> messages = appointmentMessageService.findByAppointmentId(appointmentId, currentUserLogin);
+        return ResponseEntity.ok().body(messages);
     }
 }
 

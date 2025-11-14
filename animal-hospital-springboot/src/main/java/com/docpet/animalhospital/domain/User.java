@@ -11,11 +11,18 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.PrePersist;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Table(name = "jhi_user")
+@DynamicInsert // Chỉ insert các cột có giá trị, sử dụng DEFAULT cho các cột null
+// Tắt AuditingEntityListener cho User entity để tự quản lý auditing fields
+// Vì AuditingEntityListener có thể set null khi không có user đăng nhập
+@EntityListeners({}) // Empty array để tắt listener từ AbstractAuditingEntity
 public class User extends AbstractAuditingEntity<Long> implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -74,6 +81,22 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
     @Column(name = "reset_date")
     private Instant resetDate = null;
 
+    // Override createdBy field để tự quản lý, không dùng @CreatedBy annotation
+    @Column(name = "created_by", nullable = false, length = 50, updatable = false)
+    private String createdBy;
+
+    // Override createdDate field để tự quản lý
+    @Column(name = "created_date", updatable = false)
+    private Instant createdDate;
+
+    // Override lastModifiedBy field để tự quản lý
+    @Column(name = "last_modified_by", length = 50)
+    private String lastModifiedBy;
+
+    // Override lastModifiedDate field để tự quản lý
+    @Column(name = "last_modified_date")
+    private Instant lastModifiedDate;
+
     @JsonIgnore
     @ManyToMany
     @JoinTable(
@@ -83,6 +106,85 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
     )
     @BatchSize(size = 20)
     private Set<Authority> authorities = new HashSet<>();
+
+    /**
+     * @PrePersist callback để đảm bảo auditing fields luôn có giá trị
+     * Chạy sau AbstractAuditingEntity.prePersist() để đảm bảo giá trị không null
+     */
+    @PrePersist
+    private void ensureAuditingFields() {
+        // Gọi super để xử lý logic cơ bản
+        super.prePersist();
+        
+        // Debug log
+        System.out.println("=== User @PrePersist called ===");
+        System.out.println("createdBy after super: " + this.createdBy);
+        System.out.println("login: " + this.getLogin());
+        
+        // Đảm bảo createdBy không null - ưu tiên giá trị đã set, nếu không thì dùng login hoặc "system"
+        // Override field nên cần set lại vào field local
+        if (this.createdBy == null || this.createdBy.trim().isEmpty()) {
+            String login = this.getLogin();
+            this.createdBy = (login != null && !login.trim().isEmpty()) ? login : "system";
+            System.out.println("Set createdBy to: " + this.createdBy);
+        }
+        // Đảm bảo createdDate không null
+        if (this.createdDate == null) {
+            this.createdDate = Instant.now();
+        }
+        // Đảm bảo lastModifiedBy không null
+        if (this.lastModifiedBy == null || this.lastModifiedBy.trim().isEmpty()) {
+            this.lastModifiedBy = this.createdBy;
+        }
+        // Đảm bảo lastModifiedDate không null
+        if (this.lastModifiedDate == null) {
+            this.lastModifiedDate = Instant.now();
+        }
+        
+        System.out.println("createdBy final: " + this.createdBy);
+        System.out.println("=== User @PrePersist end ===");
+    }
+
+    // Override getter/setter để sử dụng field local thay vì từ AbstractAuditingEntity
+    @Override
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    @Override
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @Override
+    public Instant getCreatedDate() {
+        return createdDate;
+    }
+
+    @Override
+    public void setCreatedDate(Instant createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    @Override
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    @Override
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    @Override
+    public Instant getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    @Override
+    public void setLastModifiedDate(Instant lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
 
     public Long getId() {
         return id;

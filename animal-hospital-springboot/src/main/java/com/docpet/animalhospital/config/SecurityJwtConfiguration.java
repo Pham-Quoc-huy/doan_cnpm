@@ -25,12 +25,12 @@ public class SecurityJwtConfiguration {
     @Value("${jwt.secret}")
     private String jwtKey;
 
-    private static final String JWT_ALGORITHM = "HS512";
+    private static final String JWT_ALGORITHM = "HS256";
 
     @Bean
     public JwtDecoder jwtDecoder() {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(getSecretKey())
-            .macAlgorithm(org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS512)
+            .macAlgorithm(org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256)
             .build();
         return token -> {
             try {

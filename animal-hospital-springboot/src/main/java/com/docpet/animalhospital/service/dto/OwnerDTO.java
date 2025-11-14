@@ -7,6 +7,8 @@ public class OwnerDTO implements Serializable {
 
     private Long id;
     private String name;
+    private String firstName;
+    private String lastName;
     private String phone;
     private String address;
     private Long userId;
@@ -20,6 +22,16 @@ public class OwnerDTO implements Serializable {
         this.address = owner.getAddress();
         if (owner.getUser() != null) {
             this.userId = owner.getUser().getId();
+        }
+        // Split name into firstName and lastName
+        if (owner.getName() != null && !owner.getName().trim().isEmpty()) {
+            String[] parts = owner.getName().trim().split("\\s+", 2);
+            if (parts.length > 0) {
+                this.firstName = parts[0];
+            }
+            if (parts.length > 1) {
+                this.lastName = parts[1];
+            }
         }
     }
 
@@ -37,6 +49,22 @@ public class OwnerDTO implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getPhone() {

@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS jhi_user (
     lang_key VARCHAR(10),
     activation_key VARCHAR(20),
     reset_key VARCHAR(20),
-    created_by VARCHAR(50) NOT NULL,
+    created_by VARCHAR(50) NOT NULL DEFAULT 'system',
     created_date TIMESTAMP,
     reset_date TIMESTAMP,
     last_modified_by VARCHAR(50),
@@ -59,7 +59,8 @@ CREATE TABLE IF NOT EXISTS owner (
     phone VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL,
     user_id BIGINT,
-    CONSTRAINT fk_owner__user_id FOREIGN KEY (user_id) REFERENCES jhi_user(id) ON DELETE SET NULL
+    CONSTRAINT fk_owner__user_id FOREIGN KEY (user_id) REFERENCES jhi_user(id) ON DELETE SET NULL,
+    CONSTRAINT uk_owner_user_id UNIQUE (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================

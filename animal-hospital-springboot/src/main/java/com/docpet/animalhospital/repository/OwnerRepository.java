@@ -13,6 +13,19 @@ public interface OwnerRepository extends JpaRepository<Owner, Long> {
     List<Owner> findByUserIsCurrentUser();
     
     @Query("select owner from Owner owner where owner.user.login = ?1")
-    Optional<Owner> findByUser_Login(String login);
+    List<Owner> findAllByUser_Login(String login);
+    
+    @Query("select owner from Owner owner where owner.user.login = ?1 order by owner.id asc")
+    java.util.List<Owner> findOwnersByUser_Login(String login);
+    
+    default Optional<Owner> findFirstByUser_Login(String login) {
+        java.util.List<Owner> owners = findOwnersByUser_Login(login);
+        return owners.isEmpty() ? Optional.empty() : Optional.of(owners.get(0));
+    }
+    
+    // Alias method để tương thích với code hiện tại
+    default Optional<Owner> findByUser_Login(String login) {
+        return findFirstByUser_Login(login);
+    }
 }
 

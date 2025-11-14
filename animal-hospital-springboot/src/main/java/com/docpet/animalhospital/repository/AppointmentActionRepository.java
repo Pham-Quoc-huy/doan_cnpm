@@ -1,6 +1,7 @@
 package com.docpet.animalhospital.repository;
 
 import com.docpet.animalhospital.domain.AppointmentAction;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -58,5 +59,13 @@ public interface AppointmentActionRepository extends JpaRepository<AppointmentAc
     @Query("select appointmentAction from AppointmentAction appointmentAction where appointmentAction.assignedTo.id = ?1 and appointmentAction.status = ?2")
     @EntityGraph(attributePaths = {"appointment", "assignedTo", "createdBy"})
     List<AppointmentAction> findByAssignedTo_IdAndStatus(Long assignedToId, String status);
+
+    @Query("select appointmentAction from AppointmentAction appointmentAction " +
+           "where appointmentAction.assignedTo.id = ?1 " +
+           "and appointmentAction.actionType = 'ASSIGN_ASSISTANT' " +
+           "and appointmentAction.status NOT IN ('CANCELLED', 'COMPLETED') " +
+           "and DATE(appointmentAction.appointment.timeStart) = DATE(?2)")
+    @EntityGraph(attributePaths = {"appointment", "assignedTo", "createdBy"})
+    List<AppointmentAction> findActiveAssignmentsByAssistantAndDate(Long assistantId, ZonedDateTime date);
 }
 

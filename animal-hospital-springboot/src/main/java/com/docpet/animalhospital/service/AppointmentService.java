@@ -287,6 +287,29 @@ public class AppointmentService {
     }
 
     @Transactional(readOnly = true)
+    public List<AppointmentDTO> findByDateAndAppointmentTypeAndVetId(LocalDate date, String appointmentType, Long vetId) {
+        LOG.debug("Request to get appointments by date: {}, type: {} and vetId: {}", date, appointmentType, vetId);
+        List<Appointment> appointments = appointmentRepository.findByDateAndAppointmentTypeAndVetId(date, appointmentType, vetId);
+        return appointments.stream()
+            .map(appointmentMapper::toDto)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AppointmentDTO> getEmergencyAppointmentsByDateAndVetId(String dateString, Long vetId) {
+        LOG.debug("Request to get emergency appointments for date: {} and vetId: {}", dateString, vetId);
+        LocalDate date = parseDate(dateString);
+        return findByDateAndAppointmentTypeAndVetId(date, "EMERGENCY", vetId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AppointmentDTO> getRegularAppointmentsByDateAndVetId(String dateString, Long vetId) {
+        LOG.debug("Request to get regular appointments for date: {} and vetId: {}", dateString, vetId);
+        LocalDate date = parseDate(dateString);
+        return findByDateAndAppointmentTypeAndVetId(date, "NORMAL", vetId);
+    }
+
+    @Transactional(readOnly = true)
     public boolean checkVetAvailability(Long vetId, ZonedDateTime startTime, ZonedDateTime endTime) {
         LOG.debug("Request to check availability for vet: {} at startTime: {}", vetId, startTime);
         

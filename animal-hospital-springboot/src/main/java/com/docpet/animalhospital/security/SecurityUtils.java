@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 public final class SecurityUtils {
 
@@ -22,6 +23,12 @@ public final class SecurityUtils {
             return springSecurityUser.getUsername();
         } else if (authentication.getPrincipal() instanceof String) {
             return (String) authentication.getPrincipal();
+        } else if (authentication.getPrincipal() instanceof Jwt jwt) {
+            // Extract username from JWT subject claim
+            return jwt.getSubject();
+        } else if (authentication.getName() != null && !authentication.getName().equals("anonymousUser")) {
+            // Fallback: use authentication name
+            return authentication.getName();
         }
         return null;
     }

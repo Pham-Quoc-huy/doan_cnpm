@@ -89,5 +89,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query("select appointment from Appointment appointment where DATE(appointment.timeStart) = ?1 and appointment.vet.user.login = ?2")
     @EntityGraph(attributePaths = {"pet", "vet", "owner"})
     List<Appointment> findByDateAndVet(LocalDate date, String vetLogin);
+
+    @Query("select appointment from Appointment appointment where DATE(appointment.timeStart) = ?1 and appointment.appointmentType = ?2 and appointment.vet.id = ?3")
+    @EntityGraph(attributePaths = {"pet", "vet", "owner"})
+    List<Appointment> findByDateAndAppointmentTypeAndVetId(LocalDate date, String appointmentType, Long vetId);
 }
 

@@ -1,7 +1,10 @@
 package com.docpet.animalhospital.service;
 
 import com.docpet.animalhospital.domain.Owner;
+import com.docpet.animalhospital.domain.User;
 import com.docpet.animalhospital.repository.OwnerRepository;
+import com.docpet.animalhospital.repository.UserRepository;
+import com.docpet.animalhospital.security.SecurityUtils;
 import com.docpet.animalhospital.service.dto.OwnerDTO;
 import com.docpet.animalhospital.service.mapper.OwnerMapper;
 import java.util.Optional;
@@ -20,15 +23,64 @@ public class OwnerService {
 
     private final OwnerRepository ownerRepository;
     private final OwnerMapper ownerMapper;
+    private final UserRepository userRepository;
 
-    public OwnerService(OwnerRepository ownerRepository, OwnerMapper ownerMapper) {
+    public OwnerService(OwnerRepository ownerRepository, OwnerMapper ownerMapper, UserRepository userRepository) {
         this.ownerRepository = ownerRepository;
         this.ownerMapper = ownerMapper;
+        this.userRepository = userRepository;
     }
 
     public OwnerDTO save(OwnerDTO ownerDTO) {
         LOG.debug("Request to save Owner : {}", ownerDTO);
+        
+        // Lấy user hiện tại
+        User currentUser = SecurityUtils.getCurrentUserLogin()
+            .flatMap(login -> userRepository.findOneByLogin(login.toLowerCase()))
+            .orElse(null);
+        
+        // Nếu user đã có owner, update owner hiện tại thay vì tạo mới
+        if (currentUser != null) {
+            Optional<Owner> existingOwnerOpt = ownerRepository.findFirstByUser_Login(currentUser.getLogin());
+            if (existingOwnerOpt.isPresent()) {
+                // Update owner hiện tại - combine name từ firstName/lastName nếu cần
+                Owner owner = existingOwnerOpt.get();
+                if (ownerDTO.getName() != null && !ownerDTO.getName().trim().isEmpty()) {
+                    owner.setName(ownerDTO.getName());
+                } else if (ownerDTO.getFirstName() != null || ownerDTO.getLastName() != null) {
+                    // Combine firstName và lastName
+                    String firstName = ownerDTO.getFirstName() != null ? ownerDTO.getFirstName().trim() : "";
+                    String lastName = ownerDTO.getLastName() != null ? ownerDTO.getLastName().trim() : "";
+                    if (!firstName.isEmpty() || !lastName.isEmpty()) {
+                        owner.setName((firstName + " " + lastName).trim());
+                    }
+                }
+                owner.setPhone(ownerDTO.getPhone() != null ? ownerDTO.getPhone() : owner.getPhone());
+                owner.setAddress(ownerDTO.getAddress() != null ? ownerDTO.getAddress() : owner.getAddress());
+                owner = ownerRepository.save(owner);
+                
+                // Xóa các owner duplicate (nếu có)
+                final Long savedOwnerId = owner.getId(); // Lưu ownerId vào biến final để dùng trong lambda
+                java.util.List<Owner> duplicateOwners = ownerRepository.findAllByUser_Login(currentUser.getLogin());
+                if (duplicateOwners.size() > 1) {
+                    duplicateOwners.stream()
+                        .filter(o -> !o.getId().equals(savedOwnerId))
+                        .forEach(ownerRepository::delete);
+                    LOG.warn("Deleted {} duplicate owners for user {}", duplicateOwners.size() - 1, currentUser.getLogin());
+                }
+                
+                return ownerMapper.toDto(owner);
+            }
+        }
+        
+        // Tạo owner mới
         Owner owner = ownerMapper.toEntity(ownerDTO);
+        
+        // Nếu chưa có user được set, tự động set user hiện tại
+        if (owner.getUser() == null && currentUser != null) {
+            owner.setUser(currentUser);
+        }
+        
         owner = ownerRepository.save(owner);
         return ownerMapper.toDto(owner);
     }

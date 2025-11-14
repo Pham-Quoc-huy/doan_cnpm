@@ -124,18 +124,43 @@ public class UserService {
         Set<Authority> authorities = new HashSet<>();
         authorityRepository.findById(AuthoritiesConstants.USER).ifPresent(authorities::add);
         newUser.setAuthorities(authorities);
-        userRepository.save(newUser);
+        // Set auditing fields: user tự tạo chính mình
+        // Set trực tiếp vào field để đảm bảo không bị ghi đè
+        String userLogin = newUser.getLogin();
+        String createdByValue = (userLogin != null && !userLogin.trim().isEmpty()) ? userLogin : "system";
+        Instant now = Instant.now();
+        
+        // Set giá trị
+        newUser.setCreatedBy(createdByValue);
+        newUser.setLastModifiedBy(createdByValue);
+        newUser.setCreatedDate(now);
+        newUser.setLastModifiedDate(now);
+        
+        // Debug: log giá trị trước khi save
+        LOG.debug("Before save - createdBy: {}, login: {}", newUser.getCreatedBy(), newUser.getLogin());
+        System.out.println("=== UserService Before Save ===");
+        System.out.println("createdBy: " + newUser.getCreatedBy());
+        System.out.println("login: " + newUser.getLogin());
+        
+        // Save - @PrePersist sẽ đảm bảo giá trị không null nếu vẫn còn null
+        User savedUser = userRepository.saveAndFlush(newUser);
+        
+        // Debug: log giá trị sau khi save
+        LOG.debug("After save - createdBy: {}", savedUser.getCreatedBy());
+        System.out.println("=== UserService After Save ===");
+        System.out.println("createdBy: " + savedUser.getCreatedBy());
 
+        // Tạo Owner profile
         Owner owner = new Owner();
         String fullName = buildFullName(userDTO.getFirstName(), userDTO.getLastName());
         owner.setName(fullName);
         owner.setPhone("");
         owner.setAddress("");
-        owner.setUser(newUser);
+        owner.setUser(savedUser);
         ownerRepository.save(owner);
-        LOG.debug("Created Owner profile for User: {}", newUser.getLogin());
+        LOG.debug("Created Owner profile for User: {}", savedUser.getLogin());
 
-        return newUser;
+        return savedUser;
     }
 
     public User registerVet(VetRegistrationVM vetRegistrationVM, String password) {
@@ -169,18 +194,28 @@ public class UserService {
         Set<Authority> authorities = new HashSet<>();
         authorityRepository.findById(AuthoritiesConstants.DOCTOR).ifPresent(authorities::add);
         newUser.setAuthorities(authorities);
-        userRepository.save(newUser);
+        // Set auditing fields: user tự tạo chính mình
+        String userLogin = newUser.getLogin();
+        String createdByValue = (userLogin != null && !userLogin.trim().isEmpty()) ? userLogin : "system";
+        Instant now = Instant.now();
+        newUser.setCreatedBy(createdByValue);
+        newUser.setLastModifiedBy(createdByValue);
+        newUser.setCreatedDate(now);
+        newUser.setLastModifiedDate(now);
+        // Save - @PrePersist sẽ đảm bảo giá trị không null nếu vẫn còn null
+        User savedUser = userRepository.saveAndFlush(newUser);
 
+        // Tạo Vet profile
         Vet vet = new Vet();
         vet.setLicenseNo(vetRegistrationVM.getLicenseNo());
         if (vetRegistrationVM.getSpecialization() != null) {
             vet.setSpecialization(vetRegistrationVM.getSpecialization());
         }
-        vet.setUser(newUser);
+        vet.setUser(savedUser);
         vetRepository.save(vet);
-        LOG.debug("Created Vet profile for User: {}", newUser.getLogin());
+        LOG.debug("Created Vet profile for User: {}", savedUser.getLogin());
 
-        return newUser;
+        return savedUser;
     }
 
     public User registerAssistant(AssistantRegistrationVM assistantRegistrationVM, String password) {
@@ -214,9 +249,18 @@ public class UserService {
         Set<Authority> authorities = new HashSet<>();
         authorityRepository.findById(AuthoritiesConstants.ASSISTANT).ifPresent(authorities::add);
         newUser.setAuthorities(authorities);
-        userRepository.save(newUser);
-        LOG.debug("Created Information for Assistant: {}", newUser);
-        return newUser;
+        // Set auditing fields: user tự tạo chính mình
+        String userLogin = newUser.getLogin();
+        String createdByValue = (userLogin != null && !userLogin.trim().isEmpty()) ? userLogin : "system";
+        Instant now = Instant.now();
+        newUser.setCreatedBy(createdByValue);
+        newUser.setLastModifiedBy(createdByValue);
+        newUser.setCreatedDate(now);
+        newUser.setLastModifiedDate(now);
+        // Save - @PrePersist sẽ đảm bảo giá trị không null nếu vẫn còn null
+        User savedUser = userRepository.saveAndFlush(newUser);
+        LOG.debug("Created Information for Assistant: {}", savedUser);
+        return savedUser;
     }
 
     private boolean removeNonActivatedUser(User existingUser) {

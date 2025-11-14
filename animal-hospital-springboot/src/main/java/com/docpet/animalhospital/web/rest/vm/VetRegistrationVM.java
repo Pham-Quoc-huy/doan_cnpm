@@ -1,5 +1,6 @@
 package com.docpet.animalhospital.web.rest.vm;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -33,6 +34,7 @@ public class VetRegistrationVM {
 
     @NotNull
     @Size(min = 1, max = 100)
+    @JsonProperty("licenseNumber")
     private String licenseNo;
 
     @Size(max = 255)

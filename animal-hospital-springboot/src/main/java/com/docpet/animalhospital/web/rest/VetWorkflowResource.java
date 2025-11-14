@@ -1,6 +1,8 @@
 package com.docpet.animalhospital.web.rest;
 
 import com.docpet.animalhospital.domain.Appointment;
+import com.docpet.animalhospital.domain.AppointmentAction;
+import com.docpet.animalhospital.repository.AppointmentActionRepository;
 import com.docpet.animalhospital.repository.AppointmentRepository;
 import com.docpet.animalhospital.repository.UserRepository;
 import com.docpet.animalhospital.security.AuthoritiesConstants;
@@ -35,6 +37,7 @@ public class VetWorkflowResource {
     private final AppointmentActionService appointmentActionService;
     private final LabTestService labTestService;
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentActionRepository appointmentActionRepository;
     private final UserRepository userRepository;
 
     public VetWorkflowResource(
@@ -42,12 +45,14 @@ public class VetWorkflowResource {
         AppointmentActionService appointmentActionService,
         LabTestService labTestService,
         AppointmentRepository appointmentRepository,
+        AppointmentActionRepository appointmentActionRepository,
         UserRepository userRepository
     ) {
         this.appointmentService = appointmentService;
         this.appointmentActionService = appointmentActionService;
         this.labTestService = labTestService;
         this.appointmentRepository = appointmentRepository;
+        this.appointmentActionRepository = appointmentActionRepository;
         this.userRepository = userRepository;
     }
 
@@ -62,7 +67,9 @@ public class VetWorkflowResource {
             Appointment appointment = appointmentRepository.findById(id).orElse(null);
             if (appointment != null && appointment.getVet() != null && 
                 appointment.getVet().getUser().getLogin().equals(currentUserLogin)) {
-                return ResponseEntity.ok().body(appointmentDTO.get());
+                AppointmentDTO dto = appointmentDTO.get();
+                dto.setVet(null); // Không hiển thị thông tin vet trong response
+                return ResponseEntity.ok().body(dto);
             } else {
                 throw new BadRequestAlertException("You can only view your own appointments", ENTITY_NAME, "notauthorized");
             }
@@ -127,8 +134,45 @@ public class VetWorkflowResource {
         String currentUserLogin = SecurityUtils.getCurrentUserLogin()
             .orElseThrow(() -> new BadRequestAlertException("User not authenticated", ENTITY_NAME, "noauth"));
 
-        userRepository.findOneByLogin(assignRequest.getAssistantLogin())
+        // Lấy appointment để kiểm tra timeStart
+        Appointment appointment = appointmentRepository.findById(id)
+            .orElseThrow(() -> new BadRequestAlertException("Appointment not found", ENTITY_NAME, "notfound"));
+
+        // Kiểm tra appointment thuộc về vet hiện tại
+        if (appointment.getVet() == null || !appointment.getVet().getUser().getLogin().equals(currentUserLogin)) {
+            throw new BadRequestAlertException("You can only assign assistant for your own appointments", ENTITY_NAME, "notauthorized");
+        }
+
+        // Lấy assistant user
+        com.docpet.animalhospital.domain.User assistant = userRepository.findOneByLogin(assignRequest.getAssistantLogin())
             .orElseThrow(() -> new BadRequestAlertException("Assistant not found", ENTITY_NAME, "assistantnotfound"));
+
+        // Kiểm tra conflict: timeStart không được trùng nhau và phải cách nhau ít nhất 1 tiếng
+        List<AppointmentAction> existingAssignments = appointmentActionRepository
+            .findActiveAssignmentsByAssistantAndDate(assistant.getId(), appointment.getTimeStart());
+
+        for (AppointmentAction existingAction : existingAssignments) {
+            Appointment existingAppointment = existingAction.getAppointment();
+            // Bỏ qua appointment hiện tại đang được phân công
+            if (existingAppointment.getId().equals(id)) {
+                continue;
+            }
+
+            ZonedDateTime existingTimeStart = existingAppointment.getTimeStart();
+            ZonedDateTime newTimeStart = appointment.getTimeStart();
+
+            // Tính khoảng cách giữa 2 timeStart
+            long hoursDiff = Math.abs(java.time.Duration.between(existingTimeStart, newTimeStart).toHours());
+
+            // Kiểm tra: trùng giờ (cùng hour) hoặc cách nhau < 1 tiếng
+            if (existingTimeStart.getHour() == newTimeStart.getHour() || hoursDiff < 1) {
+                throw new BadRequestAlertException(
+                    "Trợ lý đã được phân công cho lịch hẹn khác vào thời gian này. TimeStart không được trùng nhau và phải cách nhau ít nhất 1 tiếng.",
+                    ENTITY_NAME,
+                    "assistantnotavailable"
+                );
+            }
+        }
 
         AppointmentActionDTO actionDTO = appointmentActionService.createAppointmentAction(
             id, 
