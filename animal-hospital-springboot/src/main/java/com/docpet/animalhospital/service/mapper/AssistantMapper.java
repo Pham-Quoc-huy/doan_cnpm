@@ -13,3 +13,4 @@ public interface AssistantMapper extends EntityMapper<AssistantDTO, Assistant> {
     Assistant toEntity(AssistantDTO assistantDTO);
 }
 
+
