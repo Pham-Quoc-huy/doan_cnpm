@@ -38,12 +38,11 @@ const Register = () => {
       const response = await fetch("http://localhost:8080/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(registrationBody), // Sử dụng registrationBody
+        body: JSON.stringify(registrationBody),
       });
 
       if (response.ok) {
         setMessage("Đăng ký thành công! Bạn có thể đăng nhập.");
-        // Reset form, giữ lại authorities và langKey
         setFormData({
           login: "",
           password: "",
@@ -54,15 +53,12 @@ const Register = () => {
           authorities: ["ROLE_OWNER"], 
         });
       } else {
-        let errorMsg = "Đăng ký thất bại!";
+        let err = "Đăng ký thất bại!";
         try {
           const data = await response.json();
-          // Lỗi từ backend thường báo lỗi tên đăng nhập/email đã tồn tại
-          errorMsg = data.message || errorMsg; 
-        } catch (err) {
-          console.log("No JSON body returned");
-        }
-        setMessage(errorMsg);
+          if (data.message) err = data.message;
+        } catch {err}
+        setMessage(err);
       }
     } catch (error) {
       console.error(error);
@@ -75,7 +71,6 @@ const Register = () => {
        <div className="register-container">
          <h2>Đăng Ký Tài Khoản</h2>
          <form className="register-form" onSubmit={handleSubmit}>
-           {/* Các input khác giữ nguyên */}
            <div className="form-group">
              <label>Họ</label>
              <input

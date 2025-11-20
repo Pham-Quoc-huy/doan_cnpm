@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../css/Login.css";
 
 const Login = () => {
-  const [login, setLogin] = useState(""); // login, KHÔNG phải email
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -18,7 +18,7 @@ const Login = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: login, // <-- chính xác
+          username: login,
           password: password,
           rememberMe: true,
         }),
@@ -38,7 +38,6 @@ const Login = () => {
 
       const account = await accountRes.json();
       localStorage.setItem("user", JSON.stringify(account));
-      // Lưu JWT
       localStorage.setItem("jwt", data.id_token);
 
       // Điều hướng

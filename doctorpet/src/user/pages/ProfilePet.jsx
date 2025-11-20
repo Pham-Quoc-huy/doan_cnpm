@@ -7,15 +7,12 @@ const ProfilePet = (props) => {
   const [pets, setPets] = useState([]);
   const [showSidebarPet, setShowSidebarPet] = useState(false);
   const [activePetItemId, setActivePetItemId] = useState(null);
+// lấy token
+  const jwt = localStorage.getItem("jwt"); 
 
-  const jwt = localStorage.getItem("jwt"); // lấy token
-
-  // Lấy danh sách pet từ API khi component mount
   useEffect(() => {
     const fetchPets = async () => {
-      const jwt = localStorage.getItem("jwt"); // Lấy JWT
-
-      if (!jwt) return; // Đảm bảo có token
+      if (!jwt) return; 
 
       try {
         const res = await fetch(
@@ -27,7 +24,7 @@ const ProfilePet = (props) => {
 
         if (!res.ok) throw new Error("Không thể tải danh sách pet");
         const data = await res.json();
-        setPets(data); // Lưu danh sách pets
+        setPets(data); 
       } catch (err) {
         console.error("Lỗi khi tải danh sách pet:", err);
       }
@@ -53,15 +50,12 @@ const ProfilePet = (props) => {
 
   // Thêm mới hoặc cập nhật pet qua API
   const handleSavePet = async (data) => {
-    // 3. Tiêm ownerId vào data trước khi gửi
+    // 
     const bodyData = { ...data, ownerId: props.ownerId };
-    // Chuẩn bị URL và Method
     const url = activePetItemId
       ? `http://localhost:8080/api/pets/${activePetItemId}`
       : "http://localhost:8080/api/pets";
     const method = activePetItemId ? "PUT" : "POST";
-
-    // Nếu cập nhật, cần đảm bảo ID của pet item được đưa vào body
     if (activePetItemId) {
       bodyData.id = activePetItemId;
     }
@@ -73,11 +67,10 @@ const ProfilePet = (props) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${jwt}`,
         },
-        body: JSON.stringify(bodyData), // Sử dụng bodyData đã có ownerId
+        body: JSON.stringify(bodyData), 
       });
 
       if (!res.ok) {
-        // ... (xử lý lỗi giữ nguyên)
         const errorData = await res.json();
         const errorMessage =
           errorData.message ||
@@ -89,7 +82,6 @@ const ProfilePet = (props) => {
 
       const savedPet = await res.json();
 
-      // Cập nhật State
       if (activePetItemId) {
         setPets(pets.map((p) => (p.id === activePetItemId ? savedPet : p)));
       } else {
