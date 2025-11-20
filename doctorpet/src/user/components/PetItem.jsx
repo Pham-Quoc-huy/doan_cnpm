@@ -30,7 +30,7 @@ const PetItem = (props) => {
 
       <img className="pet-avatar" src={props.imageUrl} alt="pet" />
 
-      <div className="pet-info">
+      <div className="pet-info-profile">
         <div className="pet-field">{props.name}</div>
         <div className="pet-field">{props.dateOfBirth}</div>
         <div className="pet-field">{props.weight}</div>

@@ -21,7 +21,7 @@ body {
 /* Profile */
 .profile-section {
   width: 100%;
-  padding: 20px;
+  padding: 10px;
   text-align: center;
 }
 
@@ -63,7 +63,7 @@ body {
   margin-left: 0px;
 }
 
-.menu-btn:hover,.menu-btn .active{
+.menu-btn:hover,.menu-btn.active{
   background: white;
   color: #ff914d;
   box-shadow: 0 4px 12px rgba(255, 106, 0, 0.4);

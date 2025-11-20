@@ -53,8 +53,9 @@
   margin-bottom: 25px;
 }
 
-.pet-info {
+.pet-info-profile {
   width: 100%;
+  flex-direction: column;
 }
 
 .pet-field {
@@ -63,4 +64,5 @@
   margin-bottom: 12px;
   padding: 5px;
   border: 1px solid #ff914d ;
+  width: 100%;
 }

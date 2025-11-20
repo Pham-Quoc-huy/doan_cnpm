@@ -81,7 +81,7 @@ const SupportLayout = () => {
             <Header />
 
             <div className="dashboard-container">
-                <Sidebar />
+                <Sidebar/>
                 <MainContent
                     appointments={appointments}
                     formatDateTime={formatDateTime}
