@@ -40,7 +40,22 @@ body {
   border-radius: 6px;
   border: 1px solid #ff914d;
 }
-
+.edit-profile-btn {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #ed8a43, #ffbb00);
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 0px;
+}
+.edit-profile-btn:hover{
+  background: white;
+  color: #ff914d;
+  box-shadow: 0 4px 12px rgba(255, 106, 0, 0.4);
+  border-bottom: 2px solid #ff914d
+}
 /* Menu */
 .menu-section {
   width: 100%;

@@ -6,10 +6,9 @@ import ProfilePet from "../pages/ProfilePet";
 import Appointment from "../pages/Appointment";
 import Schedule from "../pages/Schedule";
 import Question from "../pages/Question";
-
+import Swal from "sweetalert2";
 const UserLayout = () => {
   const [active, setActive] = useState("profile");
-
   // State lưu thông tin user (owner)
   const [userInfo, setUserInfo] = useState({
     name: "",
@@ -102,7 +101,11 @@ const UserLayout = () => {
 
       if (!response.ok) throw new Error("Failed to update owner");
       const data = await response.json();
-      alert("Cập nhật thành công!");
+      Swal.fire({
+        title: "Tốt lắm!",
+        text: "Bạn đã cập nhật thành công!",
+        icon: "success",
+      });
       setUserInfo((prev) => ({
         ...prev,
         phone: data.phone,
@@ -110,7 +113,11 @@ const UserLayout = () => {
       }));
     } catch (error) {
       console.error("Lỗi khi cập nhật owner:", error);
-      alert("Cập nhật thất bại!");
+      Swal.fire({
+        title: "Ngu lắm!",
+        text: "Cập nhật thất bại!",
+        icon: "error",
+      });
     }
   };
   return (
@@ -157,6 +164,7 @@ const UserLayout = () => {
               readOnly={!isEditing}
             />
             <button
+              className="edit-profile-btn"
               onClick={() => {
                 // Khi nhấn Lưu (isEditing là true), gọi API update, sau đó chuyển sang chế độ Sửa
                 if (isEditing) updateOwner();

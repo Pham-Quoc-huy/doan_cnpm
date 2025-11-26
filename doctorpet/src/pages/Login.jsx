@@ -40,8 +40,16 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(account));
       localStorage.setItem("jwt", data.id_token);
 
-      // Điều hướng
-      window.location.href = "/user";
+      const authorities = account.authorities || [];
+      console.log("AUTHORITIES:", authorities); // log kiểm tra
+
+      if (authorities.includes("ROLE_USER")) {
+        window.location.href = "/user";
+      } else if (authorities.includes("ROLE_VET")) {
+        window.location.href = "/vet";
+      } else {
+        window.location.href = "/";
+      }
     } catch (error) {
       console.error(error);
       setErrorMessage("Không thể kết nối server!");

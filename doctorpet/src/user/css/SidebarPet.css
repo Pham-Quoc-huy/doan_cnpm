@@ -12,12 +12,12 @@
 }
 .pet-form {
   position: absolute;
-  top: 0;
-  right: 20%;
+  top: 10px;
+  left: 50%;
   width: 400px;
   height: fit-content;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; 
   gap:8px ;
   background: #fff;
   padding: 10px;
@@ -59,4 +59,14 @@
 
 .pet-form button:hover {
   background: #e25800;
+}
+.pet-form .row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20px ;
+}
+.pet-form .cloumn{
+  display: flex;
+  flex-direction: column;
 }

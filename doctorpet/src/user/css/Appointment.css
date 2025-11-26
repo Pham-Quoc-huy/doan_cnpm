@@ -61,7 +61,7 @@ textarea {
   border-radius: 6px;
   cursor: pointer;
   transition: 0.2s;
-  margin: 0;
+  margin: 0 !important;
 }
 
 .btn-appointment:hover {

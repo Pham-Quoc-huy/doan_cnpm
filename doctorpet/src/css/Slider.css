@@ -3,6 +3,7 @@ body {
   padding: 0;
   box-sizing: border-box;
   place-items: unset;
+  overflow-x: hidden;
 }
 .slider-section {
   position: relative;
