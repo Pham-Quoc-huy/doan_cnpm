@@ -24,7 +24,7 @@ const VetAppointment = (props) => {
       .then((data) => {
         // Lọc appointments phân công cho vet hiện tại
         const vetAppointments = data.filter(
-          (appt) => appt.vet?.id === props.vetId
+          (appt) => appt.vet?.id === props.vetId && appt.status === "PENDING"
         );
         console.log("Appointments của vet:", vetAppointments);
         setAppointments(vetAppointments);

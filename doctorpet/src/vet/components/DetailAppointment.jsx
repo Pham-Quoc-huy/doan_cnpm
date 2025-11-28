@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import Swal from 'sweetalert2'
 const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,63 +64,89 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
 
     } catch (error) {
       console.error(error);
-      alert("Không thể duyệt lịch!");
+      Swal.fire({
+    icon: "error",
+    title: "Không thể duyệt lịch!",
+  });;
     }
   };
   // từ chối 
    const handleReject = async () => {
-    if (!rejectReason.trim()) {
-      return alert("Vui lòng nhập lý do từ chối");
-    }
+  if (!rejectReason.trim()) return alert("Vui lòng nhập lý do từ chối");
 
-    try {
-      const res = await fetch(
-        `http://localhost:8080/api/vet/appointments/${appointmentId}/reject`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${vetToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(rejectReason),
-        }
-      );
+  try {
+    const res = await fetch(
+      `http://localhost:8080/api/vet/appointments/${appointmentId}/reject`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${vetToken}`,
+        },
+        body: JSON.stringify(rejectReason),
+      }
+    );
 
-      if (!res.ok) throw new Error("Reject thất bại");
+    if (!res.ok) throw new Error("Từ chối lịch thất bại");
 
-      const updated = await res.json();
-      setAppointment(updated);
-      onApproved?.(updated);
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+    const updated = await res.json();
+    setAppointment(updated);
+    onApproved?.(updated);
+    Swal.fire({
+    icon: "success",
+    title: "Từ chối thành công!",
+  });;
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+    icon: "error",
+    title: "Lỗi!",
+    text: "Từ chối thất bại.",
+  });
+  }
+};
   // đổi lịch 
-  const handleReschedule = async () => {
-    if (!newDate) return alert("Chọn ngày/giờ mới");
+ const handleReschedule = async () => {
+  if (!newDate) return alert("Vui lòng chọn ngày giờ mới");
 
-    try {
-      const res = await fetch(
-        `http://localhost:8080/api/vet/appointments/${appointmentId}/reschedule`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${vetToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ newDate }),
-        }
-      );
+  try {
+    // Chuyển sang ISOString để backend parse thành ZonedDateTime
+    const newTimeStart = new Date(newDate).toISOString();
 
-      if (!res.ok) throw new Error("Đổi lịch thất bại");
+    const res = await fetch(
+      `http://localhost:8080/api/vet/appointments/${appointmentId}/reschedule`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${vetToken}`,
+        },
+        body: JSON.stringify({
+          newTimeStart,
+          notes: note, // có thể dùng chung notes
+        }),
+      }
+    );
 
-      const updated = await res.json();
-      setAppointment(updated);
-      onApproved?.(updated);
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+    if (!res.ok) throw new Error("Đổi lịch thất bại");
+
+    const updated = await res.json();
+    setAppointment(updated);
+    onApproved?.(updated);
+    Swal.fire({
+    icon: "success",
+    title: "Đổi lịch thành công!",
+    text: `Lịch hẹn đã được cập nhật.`,
+  });;
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+    icon: "error",
+    title: "Lỗi!",
+    text: "Đổi lịch thất bại.",
+  });
+  }
+};
   if (loading) return <div>Đang tải chi tiết lịch hẹn...</div>;
   if (error) return <div style={{ color: "red" }}>{error}</div>;
   if (!appointment) return <div>Không tìm thấy lịch hẹn.</div>;
