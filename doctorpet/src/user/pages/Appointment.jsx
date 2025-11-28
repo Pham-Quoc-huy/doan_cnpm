@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/Appointment.css";
-
+import Swal from 'sweetalert2'
 const Appointment = ({ token }) => {
   const [formData, setFormData] = useState({
     timeStart: "",
@@ -113,13 +113,29 @@ const jwt = localStorage.getItem("jwt");
       });
 
       if (res.status === 201) {
-        setMessage("Đặt lịch thành công!");
+         Swal.fire({
+      icon: "success",
+      title: "Thành công",
+      text: "Đặt lịch thành công!",
+    });
       } else if (res.status === 400) {
-        setMessage("Đặt lịch thất bại — kiểm tra dữ liệu đầu vào.");
+        Swal.fire({
+      icon: "error",
+      title: "Thất bại",
+      text: "Đặt lịch thất bại — kiểm tra dữ liệu đầu vào.",
+    });
       } else if (res.status === 401) {
-        setMessage("Bạn chưa đăng nhập hoặc token không hợp lệ.");
+        Swal.fire({
+      icon: "warning",
+      title: "Chưa đăng nhập",
+      text: "Bạn chưa đăng nhập hoặc token không hợp lệ.",
+    });
       } else {
-        setMessage(`Đặt lịch thất bại, lỗi: ${res.status}`);
+        Swal.fire({
+      icon: "error",
+      title: "Lỗi",
+      text: `Đặt lịch thất bại, lỗi: ${res.status}`,
+    });
       }
     } catch (error) {
       console.error(error);

@@ -10,65 +10,79 @@ import Swal from "sweetalert2";
 const UserLayout = () => {
   const [active, setActive] = useState("profile");
   // State lưu thông tin user (owner)
+  const [owners, setOwners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const savedUser = localStorage.getItem("user");
+  const user = JSON.parse(savedUser);
+  useEffect(() => {
+    const fetchOwners = async () => {
+      try {
+        const jwt = localStorage.getItem("jwt");
+        const response = await fetch("http://localhost:8080/api/owners", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Lỗi khi fetch: ${response.status}`);
+        }
+        const data = await response.json();
+        setOwners(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOwners();
+  }, []); 
   const [userInfo, setUserInfo] = useState({
     name: "",
     address: "",
     phone: "",
     id: "",
-    user_id: "",
+    user_id: user.id,
   });
   const [isEditing, setIsEditing] = useState(false);
-
   useEffect(() => {
-    // 1. Lấy thông tin user từ localStorage
-    const savedUser = localStorage.getItem("user");
-    // Lấy JWT từ localStorage (không dùng ở đây nhưng cần cho hàm updateOwner)
-    const jwt = localStorage.getItem("jwt");
+    if (!user || owners.length === 0) return;
 
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
+    const ownerMatches = owners.filter((owner) => owner.userId === user.id);
+    if (ownerMatches.length === 0) return;
 
-      // Lưu id của user làm ownerId
-      const userId = user.id;
+    const ownerId = ownerMatches[0].id;
+    const fetchOwner = async () => {
+      try {
+        const jwt = localStorage.getItem("jwt");
+        const response = await fetch(
+          `http://localhost:8080/api/owners/${ownerId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+            credentials: "include",
+          }
+        );
+        if (!response.ok) throw new Error("Failed to fetch owner info");
+        const data = await response.json();
 
-      setUserInfo({
-        name: `${user.firstName} ${user.lastName}`,
-        address: "", // sẽ fetch sau từ API
-        phone: "", // sẽ fetch sau từ API
-        id: userId, // set ownerId = id
-        user_id: userId,
-      });
+        setUserInfo({
+          name: `${user.firstName} ${user.lastName}`,
+          address: data.address || "",
+          phone: data.phone || "",
+          id: ownerId,
+          user_id: user.id,
+        });
+      } catch (error) {
+        console.error("Lỗi khi fetch thông tin owner:", error);
+      }
+    };
 
-      // 2. Fetch dữ liệu owner dựa vào ownerId (bao gồm cả address và phone)
-      const fetchOwner = async () => {
-        try {
-          const response = await fetch(
-            `http://localhost:8080/api/owners/${userId}`,
-            {
-              // Thêm headers Authorization nếu dùng JWT để bảo mật route
-              headers: {
-                Authorization: `Bearer ${jwt}`,
-              },
-              credentials: "include", // nếu backend dùng session cookie
-            }
-          );
-          if (!response.ok) throw new Error("Failed to fetch owner info");
-          const data = await response.json();
-
-          setUserInfo((prev) => ({
-            ...prev,
-            address: data.address || "",
-            phone: data.phone || "",
-          }));
-        } catch (error) {
-          console.error("Lỗi khi fetch thông tin owner:", error);
-        }
-      };
-
-      fetchOwner();
-    }
-  }, []);
-
+    fetchOwner();
+  }, [owners, user?.id]);
   // cập nhật người dùng
   const updateOwner = async () => {
     // 3. Lấy JWT để sử dụng trong header Authorization
@@ -114,12 +128,15 @@ const UserLayout = () => {
     } catch (error) {
       console.error("Lỗi khi cập nhật owner:", error);
       Swal.fire({
-        title: "Ngu lắm!",
-        text: "Cập nhật thất bại!",
+        title: "Cập nhật thất bại!",
+        text: error.message,
         icon: "error",
       });
     }
   };
+  if (loading) return <p>Đang tải dữ liệu...</p>;
+  if (error) return <p>Lỗi: {error}</p>;
+  console.log("User Info:", userInfo);
   return (
     <>
       <Header />
