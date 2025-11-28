@@ -1,0 +1,152 @@
+/* Container tổng */
+.vet-profile-sup-container {
+  width: 100%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+/* Button thêm trợ lý */
+.btn-add {
+  padding: 10px 20px;
+  background-color: #ff914d;
+  color: white;
+  border: none; 
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0px 20px 20px 0px;
+  font-size: 16px;
+  background: linear-gradient(90deg, #ed8a43, #ffbb00);
+}
+.btn-add:hover{
+  background: white;
+  color: #ff914d;
+  box-shadow: 0 4px 12px rgba(255, 106, 0, 0.4);
+  border-bottom: 2px solid #ff914d
+}
+
+/* Danh sách trợ lý */
+.assistant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Card từng trợ lý */
+.assistant-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  width: 200px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Hành động trên card */
+.assistant-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.assistant-actions button {
+  flex: 1;
+  padding: 6px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.assistant-actions button:first-child {
+  background-color: #4caf50;
+  color: white;
+}
+
+.assistant-actions button:first-child:hover {
+  background-color: #3e8e41;
+}
+
+.assistant-actions button:last-child {
+  background-color: #f44336;
+  color: white;
+}
+
+.assistant-actions button:last-child:hover {
+  background-color: #d32f2f;
+}
+
+/* Sidebar form */
+.sidebar-form {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  height: 100%;
+  background-color: #f9f9f9;
+  border-left: 1px solid #ddd;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+/* Form trong sidebar */
+.add-sup-form h3 {
+  margin-bottom: 15px;
+}
+
+.add-sup-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.add-sup-form .form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.add-sup-form button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.add-sup-form button[type="submit"] {
+  background-color: #ff914d;
+  color: white;
+}
+
+.add-sup-form button[type="submit"]:hover {
+  background-color: #ff7b24;
+}
+
+.add-sup-form button[type="button"] {
+  background-color: #ccc;
+}
+
+.add-sup-form button[type="button"]:hover {
+  background-color: #999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .assistant-list {
+    justify-content: center;
+  }
+
+  .sidebar-form {
+    width: 100%;
+  }
+}

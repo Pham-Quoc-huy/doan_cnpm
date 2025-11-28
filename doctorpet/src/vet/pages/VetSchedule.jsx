@@ -63,43 +63,23 @@ const VetSchedule = ({ vetId }) => {
       {/* NAV / Tabs */}
       {!detailId && (
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button
+          <button className={`btn-tab ${activeTab === "TODAY" ? "active" : ""}`}
             onClick={() => setActiveTab("TODAY")}
-            style={{
-              padding: "5px 10px",
-              background: activeTab === "TODAY" ? "#007bff" : "#f0f0f0",
-              color: activeTab === "TODAY" ? "white" : "black",
-            }}
           >
             Hôm nay
           </button>
-          <button
+          <button className={`btn-tab ${activeTab === "APPROVED" ? "active" : ""}`}
             onClick={() => setActiveTab("APPROVED")}
-            style={{
-              padding: "5px 10px",
-              background: activeTab === "APPROVED" ? "#007bff" : "#f0f0f0",
-              color: activeTab === "APPROVED" ? "white" : "black",
-            }}
           >
             Đã duyệt
           </button>
-          <button
+          <button className={`btn-tab ${activeTab === "REJECTED" ? "active" : ""}`}
             onClick={() => setActiveTab("REJECTED")}
-            style={{
-              padding: "5px 10px",
-              background: activeTab === "REJECTED" ? "#007bff" : "#f0f0f0",
-              color: activeTab === "REJECTED" ? "white" : "black",
-            }}
           >
             Từ chối
           </button>
-          <button
+          <button className={`btn-tab ${activeTab === "RESCHEDULED" ? "active" : ""}`}
             onClick={() => setActiveTab("RESCHEDULED")}
-            style={{
-              padding: "5px 10px",
-              background: activeTab === "RESCHEDULED" ? "#007bff" : "#f0f0f0",
-              color: activeTab === "RESCHEDULED" ? "white" : "black",
-            }}
           >
             Đã đổi lịch
           </button>
