@@ -1,6 +1,7 @@
 # Hướng Dẫn Test API - Animal Hospital Management System
 
 ## 📋 Mục Lục
+
 1. [Thiết Lập Môi Trường](#thiết-lập-môi-trường)
 2. [Authentication APIs](#authentication-apis)
 3. [Account Management APIs](#account-management-apis)
@@ -16,12 +17,15 @@
 ## 🔧 Thiết Lập Môi Trường
 
 ### Base URL
+
 ```
 http://localhost:8080
 ```
 
 ### Cấu Hình Postman Environment Variables
+
 Tạo environment trong Postman với các biến sau:
+
 - `base_url`: `http://localhost:8080`
 - `vet_token`: JWT token của vet (sẽ được set sau khi login)
 - `owner_token`: JWT token của owner (sẽ được set sau khi login)
@@ -31,13 +35,15 @@ Tạo environment trong Postman với các biến sau:
 - `vet_id`: ID của vet (ví dụ: `1`)
 
 ### Pre-request Script (Tùy chọn)
+
 Thêm vào Pre-request Script của collection để tự động thêm Authorization header:
+
 ```javascript
 if (pm.environment.get("vet_token")) {
-    pm.request.headers.add({
-        key: 'Authorization',
-        value: 'Bearer ' + pm.environment.get("vet_token")
-    });
+  pm.request.headers.add({
+    key: "Authorization",
+    value: "Bearer " + pm.environment.get("vet_token"),
+  });
 }
 ```
 
@@ -46,14 +52,17 @@ if (pm.environment.get("vet_token")) {
 ## 🔐 Authentication APIs
 
 ### 1. Đăng Nhập (Login)
+
 **Endpoint:** `POST /api/authenticate`
 
 **Headers:**
+
 ```
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "username": "vet_username",
@@ -63,6 +72,7 @@ Content-Type: application/json
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -74,14 +84,17 @@ Content-Type: application/json
 ---
 
 ### 2. Kiểm Tra Authentication
+
 **Endpoint:** `GET /api/authenticate`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
 
 **Response:**
+
 - `204 No Content`: Đã authenticated
 - `401 Unauthorized`: Chưa authenticated
 
@@ -90,14 +103,17 @@ Authorization: Bearer {token}
 ## 👤 Account Management APIs
 
 ### 1. Đăng Ký Owner
+
 **Endpoint:** `POST /api/register`
 
 **Headers:**
+
 ```
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "login": "owner1",
@@ -115,14 +131,17 @@ Content-Type: application/json
 ---
 
 ### 2. Đăng Ký Vet
+
 **Endpoint:** `POST /api/register-vet`
 
 **Headers:**
+
 ```
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "login": "vet1",
@@ -141,14 +160,17 @@ Content-Type: application/json
 ---
 
 ### 3. Lấy Thông Tin Tài Khoản Hiện Tại
+
 **Endpoint:** `GET /api/account`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -165,15 +187,18 @@ Authorization: Bearer {token}
 ---
 
 ### 4. Cập Nhật Tài Khoản
+
 **Endpoint:** `POST /api/account`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "firstName": "Nguyễn",
@@ -188,15 +213,18 @@ Content-Type: application/json
 ---
 
 ### 5. Đổi Mật Khẩu
+
 **Endpoint:** `POST /api/account/change-password`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "currentPassword": "oldpassword",
@@ -211,15 +239,18 @@ Content-Type: application/json
 ## 🐾 Pet APIs
 
 ### 1. Tạo Pet
+
 **Endpoint:** `POST /api/pets`
 
 **Headers:**
+
 ```
 Authorization: Bearer {owner_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "name": "Lucky",
@@ -234,6 +265,7 @@ Content-Type: application/json
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -252,14 +284,17 @@ Content-Type: application/json
 ---
 
 ### 2. Lấy Danh Sách Pet Của Owner
+
 **Endpoint:** `GET /api/pets`
 
 **Headers:**
+
 ```
 Authorization: Bearer {owner_token}
 ```
 
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -274,14 +309,17 @@ Authorization: Bearer {owner_token}
 ---
 
 ### 3. Lấy Chi Tiết Pet
+
 **Endpoint:** `GET /api/pets/{id}`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -293,15 +331,18 @@ Authorization: Bearer {token}
 ---
 
 ### 4. Cập Nhật Pet
+
 **Endpoint:** `PUT /api/pets/{id}`
 
 **Headers:**
+
 ```
 Authorization: Bearer {owner_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "id": 1,
@@ -316,9 +357,11 @@ Content-Type: application/json
 ---
 
 ### 5. Xóa Pet
+
 **Endpoint:** `DELETE /api/pets/{id}`
 
 **Headers:**
+
 ```
 Authorization: Bearer {owner_token}
 ```
@@ -330,15 +373,18 @@ Authorization: Bearer {owner_token}
 ## 📅 Appointment APIs
 
 ### 1. Tạo Appointment
+
 **Endpoint:** `POST /api/appointments`
 
 **Headers:**
+
 ```
 Authorization: Bearer {owner_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "timeStart": "2024-01-25T10:00:00+07:00",
@@ -356,10 +402,12 @@ Content-Type: application/json
 ```
 
 **Lưu ý về format thời gian:**
+
 - Format: `yyyy-MM-ddTHH:mm:ss+07:00` (ISO 8601 với timezone)
 - Ví dụ: `2024-01-25T10:00:00+07:00`
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 2,
@@ -377,14 +425,17 @@ Content-Type: application/json
 ---
 
 ### 2. Lấy Danh Sách Appointments
+
 **Endpoint:** `GET /api/appointments`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
 
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -395,16 +446,19 @@ Authorization: Bearer {token}
 ]
 ```
 
-**Lưu ý:** 
+**Lưu ý:**
+
 - Owner sẽ thấy appointments của mình
 - Vet sẽ thấy appointments được phân công cho mình
 
 ---
 
 ### 3. Lấy Chi Tiết Appointment
+
 **Endpoint:** `GET /api/appointments/{id}`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
@@ -414,15 +468,18 @@ Authorization: Bearer {token}
 ---
 
 ### 4. Kiểm Tra Vet Availability
+
 **Endpoint:** `POST /api/appointments/vet/available`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "vetId": 1,
@@ -432,10 +489,13 @@ Content-Type: application/json
 ```
 
 **Response (200 OK):**
+
 ```json
 true
 ```
+
 hoặc
+
 ```json
 false
 ```
@@ -443,9 +503,11 @@ false
 ---
 
 ### 5. Lấy Lịch Sử Appointment Của Pet
+
 **Endpoint:** `GET /api/appointments/pet/{petId}/history`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
@@ -455,9 +517,11 @@ Authorization: Bearer {token}
 ---
 
 ### 6. Lấy Regular Appointments Theo Ngày và Vet
+
 **Endpoint:** `GET /api/appointments/regular?date=2024-01-25&vetId=1`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
@@ -467,9 +531,11 @@ Authorization: Bearer {token}
 ---
 
 ### 7. Lấy Emergency Appointments Theo Ngày và Vet
+
 **Endpoint:** `GET /api/appointments/emergency?date=2024-01-25&vetId=1`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
@@ -479,15 +545,18 @@ Authorization: Bearer {token}
 ---
 
 ### 8. Gửi Tin Nhắn Trong Appointment
+
 **Endpoint:** `POST /api/appointments/{id}/messages`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "message": "Xin chào, tôi muốn hỏi về lịch hẹn"
@@ -495,6 +564,7 @@ Content-Type: application/json
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -510,14 +580,17 @@ Content-Type: application/json
 ---
 
 ### 9. Lấy Tin Nhắn Của Appointment
+
 **Endpoint:** `GET /api/appointments/{id}/messages`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
 
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -536,9 +609,11 @@ Authorization: Bearer {token}
 **Lưu ý:** Tất cả các API này yêu cầu quyền `DOCTOR` (vet)
 
 ### 1. Lấy Chi Tiết Appointment (Vet)
+
 **Endpoint:** `GET /api/vet/appointments/{id}/detail`
 
 **Headers:**
+
 ```
 Authorization: Bearer {vet_token}
 ```
@@ -548,15 +623,18 @@ Authorization: Bearer {vet_token}
 ---
 
 ### 2. Duyệt Appointment
+
 **Endpoint:** `POST /api/vet/appointments/{id}/approve`
 
 **Headers:**
+
 ```
 Authorization: Bearer {vet_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 "Ghi chú duyệt lịch hẹn"
 ```
@@ -566,15 +644,18 @@ Content-Type: application/json
 ---
 
 ### 3. Từ Chối Appointment
+
 **Endpoint:** `POST /api/vet/appointments/{id}/reject`
 
 **Headers:**
+
 ```
 Authorization: Bearer {vet_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 "Lý do từ chối"
 ```
@@ -584,15 +665,18 @@ Content-Type: application/json
 ---
 
 ### 4. Đổi Lịch Appointment ⭐
+
 **Endpoint:** `POST /api/vet/appointments/{id}/reschedule`
 
 **Headers:**
+
 ```
 Authorization: Bearer {vet_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "newTimeStart": "2024-01-25T14:00:00+07:00",
@@ -601,6 +685,7 @@ Content-Type: application/json
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 2,
@@ -611,22 +696,26 @@ Content-Type: application/json
 }
 ```
 
-**Lưu ý:** 
+**Lưu ý:**
+
 - Hệ thống tự động gửi tin nhắn thông báo đổi lịch cho owner
 - Thời gian kết thúc được tự động tính dựa trên thời lượng ban đầu
 
 ---
 
 ### 5. Yêu Cầu Khám Tại Nhà ⭐
+
 **Endpoint:** `POST /api/vet/appointments/{id}/request-home-visit`
 
 **Headers:**
+
 ```
 Authorization: Bearer {vet_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "notes": "Bác sĩ sẽ đến thăm khám tại nhà. Vui lòng chuẩn bị không gian sạch sẽ."
@@ -634,6 +723,7 @@ Content-Type: application/json
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -646,22 +736,26 @@ Content-Type: application/json
 }
 ```
 
-**Lưu ý:** 
+**Lưu ý:**
+
 - Hệ thống tự động cập nhật `locationType` = "AT_HOME"
 - Hệ thống tự động gửi tin nhắn thông báo cho owner
 
 ---
 
 ### 6. Phân Công Assistant
+
 **Endpoint:** `POST /api/vet/appointments/{id}/assign-assistant`
 
 **Headers:**
+
 ```
 Authorization: Bearer {vet_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "assistantId": 1,
@@ -674,15 +768,18 @@ Content-Type: application/json
 ---
 
 ### 7. Yêu Cầu Xét Nghiệm
+
 **Endpoint:** `POST /api/vet/appointments/{id}/request-lab-test`
 
 **Headers:**
+
 ```
 Authorization: Bearer {vet_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "testName": "Xét nghiệm máu",
@@ -696,9 +793,11 @@ Content-Type: application/json
 ---
 
 ### 8. Lấy Danh Sách Actions Của Appointment
+
 **Endpoint:** `GET /api/vet/appointments/{id}/actions`
 
 **Headers:**
+
 ```
 Authorization: Bearer {vet_token}
 ```
@@ -708,9 +807,11 @@ Authorization: Bearer {vet_token}
 ---
 
 ### 9. Lấy Danh Sách Lab Tests Của Appointment
+
 **Endpoint:** `GET /api/vet/appointments/{id}/lab-tests`
 
 **Headers:**
+
 ```
 Authorization: Bearer {vet_token}
 ```
@@ -722,9 +823,11 @@ Authorization: Bearer {vet_token}
 ## 👨‍⚕️ Vet Management APIs
 
 ### 1. Lấy Danh Sách Vets
+
 **Endpoint:** `GET /api/vets`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
@@ -734,9 +837,11 @@ Authorization: Bearer {token}
 ---
 
 ### 2. Lấy Chi Tiết Vet
+
 **Endpoint:** `GET /api/vets/{id}`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
@@ -746,15 +851,18 @@ Authorization: Bearer {token}
 ---
 
 ### 3. Tạo Vet (Admin)
+
 **Endpoint:** `POST /api/vets`
 
 **Headers:**
+
 ```
 Authorization: Bearer {admin_token}
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "specialization": "Phẫu thuật",
@@ -773,9 +881,11 @@ Content-Type: application/json
 ## 👥 Owner Management APIs
 
 ### 1. Lấy Danh Sách Owners
+
 **Endpoint:** `GET /api/owners`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
@@ -785,9 +895,11 @@ Authorization: Bearer {token}
 ---
 
 ### 2. Lấy Chi Tiết Owner
+
 **Endpoint:** `GET /api/owners/{id}`
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
@@ -799,14 +911,17 @@ Authorization: Bearer {token}
 ## 🧪 Assistant APIs
 
 ### 1. Lấy Appointments Đã Được Phân Công (Assistant)
+
 **Endpoint:** `GET /api/appointments/assistant/assigned?status=PENDING`
 
 **Headers:**
+
 ```
 Authorization: Bearer {assistant_token}
 ```
 
 **Query Parameters:**
+
 - `status` (optional): "PENDING", "COMPLETED", etc.
 
 **Response (200 OK):** Danh sách AppointmentActionDTO
@@ -814,9 +929,11 @@ Authorization: Bearer {assistant_token}
 ---
 
 ### 2. Lấy Pending Assignments (Assistant)
+
 **Endpoint:** `GET /api/appointments/assistant/assigned/pending`
 
 **Headers:**
+
 ```
 Authorization: Bearer {assistant_token}
 ```
@@ -826,9 +943,11 @@ Authorization: Bearer {assistant_token}
 ---
 
 ### 3. Lấy Chi Tiết Appointment Đã Được Phân Công (Assistant)
+
 **Endpoint:** `GET /api/appointments/assistant/{id}/detail`
 
 **Headers:**
+
 ```
 Authorization: Bearer {assistant_token}
 ```
@@ -840,21 +959,25 @@ Authorization: Bearer {assistant_token}
 ## 📝 Ghi Chú Quan Trọng
 
 ### Format Thời Gian
+
 - Tất cả thời gian phải theo format ISO 8601 với timezone
 - Ví dụ: `2024-01-25T14:00:00+07:00` (25/01/2024 lúc 14:00, timezone +07:00)
 
 ### Authentication
+
 - Hầu hết các API yêu cầu JWT token trong header `Authorization: Bearer {token}`
 - Token được lấy từ API `/api/authenticate`
 - Token có thời hạn, cần đăng nhập lại khi hết hạn
 
 ### Phân Quyền
+
 - **ROLE_USER**: Owner - có thể quản lý pets, appointments của mình
 - **ROLE_DOCTOR**: Vet - có thể quản lý appointments được phân công
 - **ROLE_ASSISTANT**: Assistant - có thể xem appointments được phân công
 - **ROLE_ADMIN**: Admin - có quyền quản lý tất cả
 
 ### Lỗi Thường Gặp
+
 - **401 Unauthorized**: Token không hợp lệ hoặc đã hết hạn
 - **403 Forbidden**: Không có quyền truy cập
 - **400 Bad Request**: Dữ liệu request không hợp lệ
@@ -865,6 +988,7 @@ Authorization: Bearer {assistant_token}
 ## 🔄 Workflow Test Case Mẫu
 
 ### Test Case 1: Owner Tạo Appointment → Vet Duyệt → Đổi Lịch
+
 1. Owner đăng nhập → lấy `owner_token`
 2. Owner tạo appointment: `POST /api/appointments`
 3. Vet đăng nhập → lấy `vet_token`
@@ -874,6 +998,7 @@ Authorization: Bearer {assistant_token}
 7. Owner kiểm tra tin nhắn: `GET /api/appointments/{id}/messages`
 
 ### Test Case 2: Vet Yêu Cầu Khám Tại Nhà
+
 1. Vet đăng nhập → lấy `vet_token`
 2. Vet yêu cầu khám tại nhà: `POST /api/vet/appointments/{id}/request-home-visit`
 3. Owner kiểm tra tin nhắn: `GET /api/appointments/{id}/messages`
@@ -884,6 +1009,7 @@ Authorization: Bearer {assistant_token}
 ## 📞 Hỗ Trợ
 
 Nếu gặp vấn đề khi test API, vui lòng kiểm tra:
+
 1. Server đã chạy chưa? (`http://localhost:8080`)
 2. Database đã kết nối chưa?
 3. Token còn hợp lệ không?

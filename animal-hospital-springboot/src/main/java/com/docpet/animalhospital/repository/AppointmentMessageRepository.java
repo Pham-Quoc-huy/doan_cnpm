@@ -21,3 +21,4 @@ public interface AppointmentMessageRepository extends JpaRepository<AppointmentM
 }
 
 
+

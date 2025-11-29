@@ -90,8 +90,8 @@ public class OwnerService {
     public OwnerDTO update(OwnerDTO ownerDTO) {
         LOG.debug("Request to update Owner : {}", ownerDTO);
         
-        // Load owner hiện tại từ database để giữ nguyên user
-        Owner existingOwner = ownerRepository.findById(ownerDTO.getId())
+        // Load owner hiện tại từ database cùng với user để tránh lazy loading issues
+        Owner existingOwner = ownerRepository.findByIdWithUser(ownerDTO.getId())
             .orElseThrow(() -> new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
         
         // Lấy user hiện tại
@@ -103,6 +103,10 @@ public class OwnerService {
         if (existingOwner.getUser() == null && currentUser != null) {
             existingOwner.setUser(currentUser);
             LOG.debug("Set user {} to owner {}", currentUser.getLogin(), existingOwner.getId());
+        } else if (existingOwner.getUser() == null && currentUser == null) {
+            LOG.warn("Owner {} has no user and current user is also null. User will remain null.", existingOwner.getId());
+        } else if (existingOwner.getUser() != null) {
+            LOG.debug("Owner {} already has user {}. Keeping existing user.", existingOwner.getId(), existingOwner.getUser().getLogin());
         }
         
         // Update các field từ DTO
