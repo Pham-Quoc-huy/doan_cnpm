@@ -7,7 +7,8 @@ import AppRouter from './routes/Approuter'
 import SupportLayout from './support/layouts/SupportLayout'
 import ScheduleItem from './user/components/ScheduleItem'
 import UserLayout from './user/layouts/UserLayout'
+import Support from './support/routes/App'
 function App() {
-  return <AppRouter/>
+  return <AppRouter />
 }
 export default App

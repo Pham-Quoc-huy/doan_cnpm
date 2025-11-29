@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import "../css/AppointmentList.css";
-
+import { useNavigate } from "react-router-dom";
 const AppointmentList = () => {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [eye, setEye] = useState(null);
@@ -56,18 +57,13 @@ const AppointmentList = () => {
         loc === "ONLINE" ? "Tư vấn online" : loc;
   };
 
-  const onDetailClick = (app) => {
-    alert(`Xem chi tiết lịch của ${app.pet.name}`);
+  const onDetailClick = (appointment) => {
+    navigate(`appointments/${appointment.id}`);
   };
 
   return (
     <div className="main-content">
       <div className="content-wrapper">
-        {/* <h2>Danh sách lịch hẹn</h2>
-
-        <button className="btn-refresh" onClick={fetchAppointments}>
-          Làm mới dữ liệu
-        </button> */}
 
         {loading ? (
           <p>Đang tải dữ liệu...</p>

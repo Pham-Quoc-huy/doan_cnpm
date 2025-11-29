@@ -5,6 +5,7 @@ import Sidebar from "../components/Sidebar";
 import "remixicon/fonts/remixicon.css";
 import AppointmentList from "../pages/AppointmentList"
 import AppointmentDetail from "../pages/AppointmentDetail";
+import { Outlet, Link } from "react-router-dom";
 import { formatDateTime, getLocation, getBadgeClass } from "../components/ProfileSupport";
 
 const SupportLayout = () => {
@@ -16,17 +17,6 @@ const SupportLayout = () => {
 
             <div className="dashboard-container">
                 <Sidebar />
-                <AppointmentList
-                    formatDateTime={formatDateTime}
-                    getLocation={getLocation}
-                    getBadgeClass={getBadgeClass}
-                />
-                {/* <AppointmentDetail
-                    appointments={appointments}
-                    formatDateTime={formatDateTime}
-                    getLocation={getLocation}
-                    getBadgeClass={getBadgeClass}
-                />  */}
                 <Outlet />
 
 
