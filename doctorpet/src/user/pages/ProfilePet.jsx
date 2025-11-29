@@ -9,7 +9,6 @@ const ProfilePet = (props) => {
   const [activePetItemId, setActivePetItemId] = useState(null);
 // lấy token
   const jwt = localStorage.getItem("jwt"); 
-
   useEffect(() => {
     const fetchPets = async () => {
       if (!jwt) return; 
@@ -47,7 +46,6 @@ const ProfilePet = (props) => {
   };
 
   const activePetItem = pets.find((pet) => pet.id === activePetItemId);
-
   // Thêm mới hoặc cập nhật pet qua API
   const handleSavePet = async (data) => {
     // 

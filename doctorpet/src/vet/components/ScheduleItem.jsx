@@ -1,0 +1,88 @@
+
+import "../css/ScheduleItem.css";
+const ScheduleItem = (props) => {
+    const handleViewDetail = () => {
+    props.onDetail(props.id);  // báo lên parent
+  };
+  return (
+    <>
+      <div>
+        <div className="appointment-card">
+          <div className="card-header">
+            <div className="pet-info">
+              <div className="pet-avatar">{props.pet.name}</div>
+              <div>
+                <h3 className="pet-name">{props.pet.name}</h3>
+                <p className="pet-vet">với {props.vet.name}</p>
+              </div>
+            </div>
+            <div className="column">
+              <div
+                className={`appointmentType ${
+                  props.appointmentType === "EMERGENCY" ? "emergency" : ""
+                } `}
+              >
+                <p>
+                  {props.appointmentType === "EMERGENCY"
+                    ? "KHẨN CẤP"
+                    : "Bình Thường"}
+                </p>
+              </div>
+              <button className="view-detail-btn" onClick={handleViewDetail}>
+                Xem chi tiết
+              </button>
+            </div>
+          </div>
+
+          <div className="info-grid">
+            <div className="info-item">
+              <i
+                className="ri-calendar-line icon"
+                style={{ color: "#2563eb" }}
+              ></i>
+              <span>
+                <strong>Thời gian:</strong> {props.timeStart}
+              </span>
+            </div>
+
+            <div className="info-item">
+              <i
+                className={`icon ${
+                  props.locationType === "AT_HOME"
+                    ? "ri-home-4-line"
+                    : props.locationType === "AT_CLINIC"
+                    ? "ri-hospital-line"
+                    : ""
+                }`}
+              ></i>
+              <span>
+                <strong>Hình thức:</strong> {props.locationType}
+              </span>
+            </div>
+            <div className={`type `}>
+              <i
+                className="ri-stethoscope-line"
+                style={{ color: "#0ea5e9" }}
+              ></i>
+              <strong> Loại khám: </strong> {props.type}
+            </div>
+          </div>
+
+          <div className="info-grid">
+            <div className="info-item">
+              <i
+                className="ri-file-text-line icon"
+                style={{ color: "#6b7280" }}
+              ></i>
+              <span>
+                <strong>Ghi chú:</strong> {props.notes}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default ScheduleItem;
