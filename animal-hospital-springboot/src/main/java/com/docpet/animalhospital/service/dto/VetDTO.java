@@ -9,6 +9,8 @@ public class VetDTO implements Serializable {
     private String licenseNo;
     private String specialization;
     private Long userId;
+    private String firstName;
+    private String lastName;
 
     public Long getId() {
         return id;
@@ -40,6 +42,22 @@ public class VetDTO implements Serializable {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     @Override

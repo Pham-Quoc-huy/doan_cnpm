@@ -53,6 +53,8 @@ public class VetMapperImpl implements VetMapper {
         VetDTO vetDTO = new VetDTO();
 
         vetDTO.setUserId( sUserId( s ) );
+        vetDTO.setFirstName( sUserFirstName( s ) );
+        vetDTO.setLastName( sUserLastName( s ) );
         vetDTO.setId( s.getId() );
         vetDTO.setLicenseNo( s.getLicenseNo() );
         vetDTO.setSpecialization( s.getSpecialization() );
@@ -81,5 +83,21 @@ public class VetMapperImpl implements VetMapper {
             return null;
         }
         return user.getId();
+    }
+
+    private String sUserFirstName(Vet vet) {
+        User user = vet.getUser();
+        if ( user == null ) {
+            return null;
+        }
+        return user.getFirstName();
+    }
+
+    private String sUserLastName(Vet vet) {
+        User user = vet.getUser();
+        if ( user == null ) {
+            return null;
+        }
+        return user.getLastName();
     }
 }
