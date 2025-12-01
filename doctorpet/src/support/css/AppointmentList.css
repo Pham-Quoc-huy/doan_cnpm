@@ -1,14 +1,6 @@
-/* Reset & Layout */
-/* * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-} */
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f9fafb;
-    color: #111454;
 }
 .main-content {
     margin: 10px;
@@ -34,7 +26,7 @@ body {
     border: 2px solid #f7e5b2;
     transition: box-shadow 0.4s ease;
     margin-bottom: 16px;
-    width: 100%;
+    background-color: #f1f1f1;
 }
 
 .appointment-card:hover {
@@ -48,6 +40,7 @@ body {
     align-items: flex-start;
     border: 10px;
     border-color: #800303;
+    padding: 0;
 }
 
 .pet-info {

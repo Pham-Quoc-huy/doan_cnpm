@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../css/AppointmentList.css";
 import { useNavigate } from "react-router-dom";
+import { formatDateTime, getLocation, getBadgeClass } from '../components/appointmentFormatter';
 const AppointmentList = () => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
@@ -37,28 +38,9 @@ const AppointmentList = () => {
     fetchAppointments();
   }, []);
 
-  const formatDateTime = (timeStr) => {
-    const d = new Date(timeStr);
-    const pad = (n) => n.toString().padStart(2, '0');
-    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} - ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  };
-
-  const getBadgeClass = (type) => {
-    const map = {
-      EMERGENCY: "badge-emergency",
-      NORMAL: "badge-normal"
-    };
-    return map[type] || "badge";
-  };
-
-  const getLocation = (loc) => {
-    return loc === "AT_HOME" ? "Tại nhà" :
-      loc === "AT_CLINIC" ? "Tại phòng khám" :
-        loc === "ONLINE" ? "Tư vấn online" : loc;
-  };
 
   const onDetailClick = (appointment) => {
-    navigate(`appointments/${appointment.id}`);
+    navigate(`appointment/${appointment.id}`);
   };
 
   return (
@@ -77,7 +59,7 @@ const AppointmentList = () => {
                   <div className="pet-avatar">{app.pet.name[0]}</div>
                   <div>
                     <h3 className="pet-name">{app.pet.name}</h3>
-                    <p className="pet-vet">với {app.vet.name}</p>
+                    <p className="pet-vet">với BS: {app.vet.lastName + " " + app.vet.firstName}</p>
                   </div>
                 </div>
                 <div className={`appointmentType ${getBadgeClass(app.appointmentType)}`}>
@@ -93,7 +75,7 @@ const AppointmentList = () => {
                   </span>
                 </div>
 
-                <div className="info-item">
+                {/* <div className="info-item">
                   <i
                     className={`icon ${app.locationType === "AT_HOME"
                       ? "ri-home-4-line"
@@ -105,22 +87,28 @@ const AppointmentList = () => {
                   <span>
                     <strong>Hình thức:</strong> {getLocation(app.locationType)}
                   </span>
-                </div>
+                </div> */}
 
-                <div className="type">
+                {/* <div className="type">
                   <i className="ri-stethoscope-line" style={{ color: "#0ea5e9" }}></i>
                   <strong> Loại khám: </strong> {app.type}
+                </div> */}
+                <div className="info-item">
+                  <i className="ri-time-line icon-info text-orange-600"></i>
+                  <div>
+                    <strong>Trạng thái:</strong> {app.status}
+                  </div>
                 </div>
               </div>
 
-              <div className="info-grid">
+              {/* <div className="info-grid">
                 <div className="info-item">
                   <i className="ri-file-text-line icon" style={{ color: "#6b7280" }}></i>
                   <span>
                     <strong>Ghi chú:</strong> {app.notes || "Không có"}
                   </span>
                 </div>
-              </div>
+              </div> */}
 
               <div className="detail-button-container">
                 <button

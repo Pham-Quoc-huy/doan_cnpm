@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "remixicon/fonts/remixicon.css";
 import "../css/AppointmentDetail.css";
 import { useParams } from "react-router-dom";
+import { formatDateTime, getLocation, getBadgeClass } from '../components/appointmentFormatter';
 
 const AppointmentDetail = () => {
     const { id } = useParams();
@@ -34,30 +35,30 @@ const AppointmentDetail = () => {
         fetchAppointment();
     }, [id]);
 
-    const formatDateTime = (timeStr) => {
-        if (!timeStr) return "";
-        const d = new Date(timeStr);
-        const pad = (n) => n.toString().padStart(2, "0");
-        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} - ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    };
+    // const formatDateTime = (timeStr) => {
+    //     if (!timeStr) return "";
+    //     const d = new Date(timeStr);
+    //     const pad = (n) => n.toString().padStart(2, "0");
+    //     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} - ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    // };
 
-    const getBadgeClass = (type) => {
-        const map = {
-            EMERGENCY: "badge-emergency",
-            NORMAL: "badge-normal",
-        };
-        return map[type] || "badge";
-    };
+    // const getBadgeClass = (type) => {
+    //     const map = {
+    //         EMERGENCY: "badge-emergency",
+    //         NORMAL: "badge-normal",
+    //     };
+    //     return map[type] || "badge";
+    // };
 
-    const getLocation = (loc) => {
-        return loc === "AT_HOME"
-            ? "Tại nhà"
-            : loc === "AT_CLINIC"
-                ? "Tại phòng khám"
-                : loc === "ONLINE"
-                    ? "Tư vấn online"
-                    : loc;
-    };
+    // const getLocation = (loc) => {
+    //     return loc === "AT_HOME"
+    //         ? "Tại nhà"
+    //         : loc === "AT_CLINIC"
+    //             ? "Tại phòng khám"
+    //             : loc === "ONLINE"
+    //                 ? "Tư vấn online"
+    //                 : loc;
+    // };
 
     if (loading) return <p>Đang tải dữ liệu...</p>;
     if (!appointment) return <p>Không tìm thấy lịch hẹn.</p>;
@@ -79,7 +80,7 @@ const AppointmentDetail = () => {
                             </div>
                             <div>
                                 <h3 className="pet-name-detail">{appointment.pet?.name}</h3>
-                                <p className="pet-vet-detail">với {appointment.vet?.name}</p>
+                                <p className="pet-vet-detail">với BS: {appointment.vet.lastName + " " + appointment.vet.firstName}</p>
                             </div>
                         </div>
 
@@ -112,8 +113,12 @@ const AppointmentDetail = () => {
                                 <p>{getLocation(appointment.locationType)}</p>
                             </div>
                         </div>
+                        <div className="type">
+                            <i className="ri-stethoscope-line" style={{ color: "#0ea5e9" }}></i>
+                            <strong> Loại khám: </strong> {appointment.type}
+                        </div>
 
-                        <div className="info-row">
+                        {/* <div className="info-row">
                             <i className="ri-time-line icon-info text-orange-600"></i>
                             <div>
                                 <strong>Trạng thái</strong>
@@ -121,7 +126,7 @@ const AppointmentDetail = () => {
                                     {appointment.status}
                                 </p>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
 
                     {/* Notes */}

@@ -1,39 +1,9 @@
-// import React from "react";
 
-// const Sidebar = () => {
-//     return (
-//         <div className="dashboard-container">
-//             <div className="sidebar">
-//                 <div className="profile-section">
-//                     <img className="avatar" src="../public/assets/meme.jpg"></img>
-//                     <input
-//                         type="text"
-//                         placeholder="Tên người dùng"
-//                         className="info-input"
-//                     />
-//                     <input type="text" placeholder="Email" className="info-input" />
-//                     <input
-//                         type="text"
-//                         placeholder="Số điện thoại"
-//                         className="info-input"
-//                     />
-//                 </div>
-
-//                 <div className="menu-section">
-//                     <button className="menu-btn">Hồ sơ thú cưng</button>
-//                     <button className="menu-btn">Đặt lịch khám</button>
-//                     <button className="menu-btn">Lịch đã đặt</button>
-//                     <button className="menu-btn">Đặt câu hỏi</button>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default Sidebar;
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
+    const navigate = useNavigate();
     const [user, setUserInfo] = useState({
         name: "",
         address: "",
@@ -65,7 +35,7 @@ const Sidebar = () => {
     }, []);
 
     return (
-        <div className="dashboard-container">
+        <div className="dashboard-containe">
             <div className="sidebar">
                 <div className="profile-section">
                     <img className="avatar" src={user.avatar} alt="avatar" />
@@ -75,7 +45,10 @@ const Sidebar = () => {
                 </div>
 
                 <div className="menu-section">
-                    <button className="menu-btn">Danh sách lịch hẹn</button>
+                    <button className="menu-btn"
+                        onClick={() => navigate("/support")}>
+                        Danh sách lịch hẹn
+                    </button>
                 </div>
             </div>
         </div>

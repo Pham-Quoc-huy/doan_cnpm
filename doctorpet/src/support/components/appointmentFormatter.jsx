@@ -1,16 +1,16 @@
 // src/pages/ProfileSupport.js
 
-export const appointments = [
-    {
-        timeStart: "2025-01-25T14:00:00+07:00",
-        type: "Cấp cứu",
-        appointmentType: "EMERGENCY",
-        locationType: "AT_HOME",
-        pet: { id: 2, name: "Mít" },
-        vet: { id: 3, name: "BS. Nguyễn Văn A" },
-        notes: "Thú cưng bị nôn mửa và không ăn được "
-    },
-];
+// export const appointments = [
+//     {
+//         timeStart: "2025-01-25T14:00:00+07:00",
+//         type: "Cấp cứu",
+//         appointmentType: "EMERGENCY",
+//         locationType: "AT_HOME",
+//         pet: { id: 2, name: "Mít" },
+//         vet: { id: 3, name: "BS. Nguyễn Văn A" },
+//         notes: "Thú cưng bị nôn mửa và không ăn được "
+//     },
+// ];
 
 export const formatDateTime = (dateString) => {
     const d = new Date(dateString);

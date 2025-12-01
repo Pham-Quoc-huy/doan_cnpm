@@ -1,19 +1,16 @@
-/* ========================================================================== */
-/*  AppointmentDetail.css – CSS riêng, không phụ thuộc Tailwind               */
-/* ========================================================================== */
 
 .detail-content {
     flex: 1;
     padding: 24px;
-    background-color: #f9fafb;
-    min-height: 100vh;
+    background-color: #ffffff;
+    margin: 10px;
+    border-radius: 12px;
 }
 
 .detail-wrapper {
-    width: 1200px;
-    max-width: 100%;
     margin: 0 auto;
     padding: 0 16px;
+    width: 100%;
 }
 
 /* Tiêu đề trang */
@@ -21,15 +18,12 @@
     font-size: 1.875rem;
     font-weight: 700;
     color: #1f2937;
-    margin-bottom: 28px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    margin-bottom: 24px;
 }
 
 /* Card chính */
 .detail-card {
-    background: #ffffff;
+    background: #f1f1f1;
     border-radius: 12px;
     padding: 28px;
     box-shadow: 0 4px 20px #f7e5b2;
@@ -43,7 +37,7 @@
     align-items: flex-start;
     padding-bottom: 20px;
     border-bottom: 1px solid #f3f4f6;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .detail-pet {

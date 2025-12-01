@@ -9,7 +9,7 @@ function SupportApp() {
         <Routes>
             <Route element={<SupportLayout />}>
                 <Route index element={<AppointmentList />} />
-                <Route path="appointments/:id" element={<AppointmentDetail />} />
+                <Route path="appointment/:id" element={<AppointmentDetail />} />
             </Route>
 
         </Routes>
