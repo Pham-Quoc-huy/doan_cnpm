@@ -3,11 +3,13 @@ import "remixicon/fonts/remixicon.css";
 import "../css/AppointmentDetail.css";
 import { useParams } from "react-router-dom";
 import { formatDateTime, getLocation, getBadgeClass } from '../components/appointmentFormatter';
+import ChatBox from "../components/Chatbox.jsx";
 
 const AppointmentDetail = () => {
     const { id } = useParams();
     const [appointment, setAppointment] = useState(null);
     const [loading, setLoading] = useState(true);
+    const currentUser = JSON.parse(localStorage.getItem("user"));
 
     const fetchAppointment = async () => {
         const jwt = localStorage.getItem("jwt");
@@ -155,6 +157,7 @@ const AppointmentDetail = () => {
                         </div>
                     </div>
                 </div>
+                <ChatBox appointmentId={id} currentUser={currentUser} />
             </div>
         </div>
     );
