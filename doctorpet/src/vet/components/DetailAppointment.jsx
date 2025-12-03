@@ -1,33 +1,29 @@
 import React, { useEffect, useState } from "react";
 import "../css/DetailAppointment.css";
 import Swal from "sweetalert2";
+
 const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [rejectReason, setRejectReason] = useState("");
-  const [newDate, setNewDate] = useState("");
+
   const vetToken = localStorage.getItem("jwt");
 
-  console.log("DetailAppointment nhận:", appointment, onApproved);
-
+  // LẤY CHI TIẾT LỊCH HẸN
   useEffect(() => {
     const fetchAppointment = async () => {
       setLoading(true);
-      setError("");
       try {
-        const response = await fetch(
+        const res = await fetch(
           `http://localhost:8080/api/vet/appointments/${appointmentId}/detail`,
           {
-            headers: {
-              Authorization: `Bearer ${vetToken}`,
-            },
+            headers: { Authorization: `Bearer ${vetToken}` },
           }
         );
-        if (!response.ok) {
-          throw new Error("Không thể lấy chi tiết appointment");
-        }
-        const data = await response.json();
+
+        if (!res.ok) throw new Error("Không thể lấy chi tiết lịch hẹn");
+
+        const data = await res.json();
         setAppointment(data);
       } catch (err) {
         setError(err.message);
@@ -38,13 +34,10 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
 
     fetchAppointment();
   }, [appointmentId, vetToken]);
-
-  // duyệt lịch
-  const [note, setNote] = useState("");
-
-  const handleApprove = async () => {
+  // API DUYỆT LỊCH
+  const approveAppointment = async (assistantId, note) => {
     try {
-      const updated = await fetch(
+      const res = await fetch(
         `http://localhost:8080/api/vet/appointments/${appointmentId}/approve`,
         {
           method: "POST",
@@ -52,67 +45,135 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${vetToken}`,
           },
-          body: JSON.stringify(note),
+          body: JSON.stringify({
+            notes: note || "",
+            assistantId: assistantId || null,
+          }),
         }
       );
 
-      if (!updated.ok) {
-        throw new Error("Lỗi duyệt lịch!");
-      }
-
-      const result = await updated.json();
-      setAppointment(result);
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: "error",
-        title: "Không thể duyệt lịch!",
-      });
-    }
-  };
-  // từ chối
-  const handleReject = async () => {
-    if (!rejectReason.trim()) return alert("Vui lòng nhập lý do từ chối");
-
-    try {
-      const res = await fetch(
-        `http://localhost:8080/api/vet/appointments/${appointmentId}/reject`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${vetToken}`,
-          },
-          body: JSON.stringify(rejectReason),
-        }
-      );
-
-      if (!res.ok) throw new Error("Từ chối lịch thất bại");
+      if (!res.ok) throw new Error("Duyệt lịch thất bại");
 
       const updated = await res.json();
       setAppointment(updated);
       onApproved?.(updated);
-      Swal.fire({
-        icon: "success",
-        title: "Từ chối thành công!",
-      });
+
+      Swal.fire("Thành công!", "Lịch hẹn đã được duyệt", "success");
     } catch (err) {
-      console.error(err);
-      Swal.fire({
-        icon: "error",
-        title: "Lỗi!",
-        text: "Từ chối thất bại.",
-      });
+      Swal.fire("Lỗi!", err.message, "error");
     }
   };
-  // đổi lịch
-  const handleReschedule = async () => {
-    if (!newDate) return alert("Vui lòng chọn ngày giờ mới");
+
+  // DUYỆT LỊCH - UI
+  const handleApprove = async () => {
+    const ask = await Swal.fire({
+      title: "Phân công trợ lý?",
+      text: "Bạn có muốn chọn trợ lý hỗ trợ?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
+    });
+
+    if (!ask.isConfirmed) {
+      approveAppointment(null, "");
+      return;
+    }
+
+    // Lấy danh sách trợ lý
+    try {
+      const res = await fetch("http://localhost:8080/api/vets/assistants", {
+        headers: { Authorization: `Bearer ${vetToken}` },
+      });
+
+      const assistants = await res.json();
+      console.log("Assistants:", assistants);
+      const optionsHtml = assistants
+        .map((a) => `<option value="${a.id}">${a.firstName} ${a.lastName}</option>`)
+        .join("");
+
+      const { value: formData } = await Swal.fire({
+        title: "Chọn trợ lý & ghi chú",
+        html: `
+          <select id="assistantSelect" class="swal2-select">${optionsHtml}</select>
+          <textarea id="noteInput" class="swal2-textarea" placeholder="Ghi chú..."></textarea>
+        `,
+        focusConfirm: false,
+        preConfirm: () => ({
+          assistantId: document.getElementById("assistantSelect").value,
+          note: document.getElementById("noteInput").value,
+        }),
+      });
+
+      if (formData) {
+        approveAppointment(formData.assistantId, formData.note);
+      }
+    } catch (err) {
+      Swal.fire("Lỗi!", err.message, "error");
+    }
+  };
+
+  // TỪ CHỐI 
+  const handleReject = async () => {
+    const ask = await Swal.fire({
+      title: "Đổi lịch mới?",
+      text: "Bạn có muốn đề xuất thời gian mới không?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
+    });
+
+    // 
+    if (!ask.isConfirmed) {
+      const { value: reason } = await Swal.fire({
+        title: "Nhập lý do từ chối",
+        input: "textarea",
+        inputPlaceholder: "Nhập lý do...",
+        showCancelButton: true,
+        confirmButtonText: "Xác nhận",
+      });
+
+      if (!reason) return;
+
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/vet/appointments/${appointmentId}/reject`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${vetToken}`,
+            },
+            body: JSON.stringify({ reason }),
+          }
+        );
+
+        const updated = await res.json();
+        setAppointment(updated);
+        onApproved?.(updated);
+
+        Swal.fire("Đã từ chối lịch!", "", "success");
+      } catch (err) {
+        Swal.fire("Lỗi!", err.message, "error");
+      }
+
+      return;
+    }
+
+    // 
+    const { value: newDate } = await Swal.fire({
+      title: "Chọn ngày giờ mới",
+      html: `<input type="datetime-local" id="dateInput" class="swal2-input">`,
+      focusConfirm: false,
+      preConfirm: () => document.getElementById("dateInput").value,
+    });
+
+    if (!newDate) {
+      return Swal.fire("Thiếu thông tin!", "Bạn chưa chọn thời gian.", "error");
+    }
 
     try {
-      // Chuyển sang ISOString để backend parse thành ZonedDateTime
-      const newTimeStart = new Date(newDate).toISOString();
-
       const res = await fetch(
         `http://localhost:8080/api/vet/appointments/${appointmentId}/reschedule`,
         {
@@ -122,115 +183,52 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
             Authorization: `Bearer ${vetToken}`,
           },
           body: JSON.stringify({
-            newTimeStart,
-            notes: note, // có thể dùng chung notes
+            newTimeStart: new Date(newDate).toISOString(),
+            notes: "Đổi lịch theo yêu cầu",
           }),
         }
       );
 
-      if (!res.ok) throw new Error("Đổi lịch thất bại");
-
       const updated = await res.json();
       setAppointment(updated);
       onApproved?.(updated);
-      Swal.fire({
-        icon: "success",
-        title: "Đổi lịch thành công!",
-        text: `Lịch hẹn đã được cập nhật.`,
-      });
+
+      Swal.fire("Đổi lịch thành công!", "", "success");
     } catch (err) {
-      console.error(err);
-      Swal.fire({
-        icon: "error",
-        title: "Lỗi!",
-        text: "Đổi lịch thất bại.",
-      });
+      Swal.fire("Lỗi!", err.message, "error");
     }
   };
+  // UI 
   if (loading) return <div>Đang tải chi tiết lịch hẹn...</div>;
   if (error) return <div style={{ color: "red" }}>{error}</div>;
   if (!appointment) return <div>Không tìm thấy lịch hẹn.</div>;
 
+  const isPending = appointment.status === "PENDING";
+
   return (
     <div className="appointment-detail">
-      <div className="row">
-        <button className="back-btn" onClick={onBack}>
-          ⬅️ Quay lại danh sách
+      <button className="back-btn" onClick={onBack}>⬅️ Quay lại</button>
+
+      <h2>Chi tiết lịch hẹn</h2>
+
+      <p><strong>ID:</strong> {appointment.id}</p>
+      <p><strong>Trạng thái:</strong> {appointment.status}</p>
+      <p><strong>Bắt đầu:</strong> {new Date(appointment.timeStart).toLocaleString()}</p>
+      <p><strong>Kết thúc:</strong> {new Date(appointment.timeEnd).toLocaleString()}</p>
+
+      <p><strong>Pet:</strong> {appointment.pet?.name}</p>
+      <p><strong>Chủ nuôi:</strong> {appointment.owner?.name}</p>
+      <p><strong>Ghi chú:</strong> {appointment.notes || "Không có"}</p>
+
+      {/* BUTTON */}
+      <div className="btn-group">
+        <button className="approve" disabled={!isPending} onClick={handleApprove}>
+          Duyệt lịch
         </button>
-      </div>
 
-      <p>
-        <strong>ID:</strong> {appointment.id}
-      </p>
-      <p>
-        <strong>Trạng thái:</strong> {appointment.status}
-      </p>
-      <p>
-        <strong>Thời gian bắt đầu:</strong>{" "}
-        {new Date(appointment.timeStart).toLocaleString()}
-      </p>
-      <p>
-        <strong>Thời gian kết thúc:</strong>{" "}
-        {new Date(appointment.timeEnd).toLocaleString()}
-      </p>
-      <p>
-        <strong>Pet:</strong> {appointment.pet?.name || "Chưa có thông tin"}
-      </p>
-      <p>
-        <strong>Owner:</strong> {appointment.owner?.name || "Chưa có thông tin"}
-      </p>
-      <p>
-        <strong>Ghi chú:</strong> {appointment.notes || "Không có"}
-      </p>
-
-      <div style={{ marginTop: "20px" }}>
-        {/* Ghi chú duyệt */}
-        <textarea
-          placeholder="Nhập ghi chú duyệt lịch..."
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-        ></textarea>
-
-        <div className="actions">
-          <button className="approve" onClick={handleApprove}>
-            Duyệt lịch
-          </button>
-        </div>
-
-        {/* REJECT */}
-        <div style={{ marginTop: 20 }}>
-          <textarea
-            placeholder="Lý do từ chối..."
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            rows={3}
-            style={{ width: "100%", marginBottom: 10 }}
-          />
-          <button
-            onClick={handleReject}
-            disabled={appointment.status !== "PENDING"}
-            style={{ background: "red", color: "white" }}
-          >
-            Từ chối
-          </button>
-        </div>
-
-        {/* RESCHEDULE */}
-        <div style={{ marginTop: 20 }}>
-          <label>Ngày giờ mới:</label>
-          <input
-            type="datetime-local"
-            value={newDate}
-            onChange={(e) => setNewDate(e.target.value)}
-            style={{ width: "100%", marginTop: 5 }}
-          />
-          <button
-            onClick={handleReschedule}
-            style={{ marginTop: 10, background: "#007bff", color: "white" }}
-          >
-            Đổi lịch
-          </button>
-        </div>
+        <button className="reject" disabled={!isPending} onClick={handleReject}>
+          Từ chối
+        </button>
       </div>
     </div>
   );

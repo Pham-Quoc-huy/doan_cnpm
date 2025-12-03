@@ -1,6 +1,12 @@
 import React from "react";
 import "../css/ScheduleItem.css";
 const ScheduleItem = (props) => {
+  const statusMap = {
+    PENDING: "Chờ duyệt",
+    APPROVED: "Đã duyệt",
+    REJECTED: "Từ chối",
+    RESCHEDULED: "Đổi lịch",
+  };
   return (
     /*<div className={`history-item ${props.appointmentType === "EMERGENCY" ? "emergency-item" : ""}`}>
       <div className="history-time">
@@ -48,9 +54,15 @@ const ScheduleItem = (props) => {
               </div>
             </div>
             <div
-              className={`appointmentType ${props.appointmentType === 'EMERGENCY' ? 'emergency': ''} `}
+              className={`appointmentType ${
+                props.appointmentType === "EMERGENCY" ? "emergency" : ""
+              } `}
             >
-              <p>{props.appointmentType === "EMERGENCY" ? "KHẨN CẤP" : "Bình Thường"}</p>
+              <p>
+                {props.appointmentType === "EMERGENCY"
+                  ? "Khẩn Cấp"
+                  : "Bình Thường"}
+              </p>
             </div>
           </div>
 
@@ -60,9 +72,10 @@ const ScheduleItem = (props) => {
                 className="ri-calendar-line icon"
                 style={{ color: "#2563eb" }}
               ></i>
-              <span>
-                <strong>Thời gian:</strong> {props.timeStart}
-              </span>
+              <p>
+                <strong>Thời gian:</strong>
+                {new Date(props.timeStart).toLocaleString("vi-VN")}
+              </p>
             </div>
 
             <div className="info-item">
@@ -76,7 +89,12 @@ const ScheduleItem = (props) => {
                 }`}
               ></i>
               <span>
-                <strong>Hình thức:</strong> {props.locationType}
+                <p>
+                  <strong>Hình thức:</strong>{" "}
+                  {props.locationType === "AT_HOME"
+                    ? "Tại nhà"
+                    : "Tại phòng khám"}
+                </p>
               </span>
             </div>
             <div className={`type `}>
@@ -84,7 +102,12 @@ const ScheduleItem = (props) => {
                 className="ri-stethoscope-line"
                 style={{ color: "#0ea5e9" }}
               ></i>
-              <strong> Loại khám: </strong> {props.type}
+              <strong>Loại khám:</strong>{" "}
+              {props.type === "SURGERY"
+                ? "Phẫu thuật"
+                : props.type === "VACCINE"
+                ? "Chích Vaccine"
+                : "Kiểm tra sức khỏe"}
             </div>
           </div>
 
@@ -98,6 +121,15 @@ const ScheduleItem = (props) => {
                 <strong>Ghi chú:</strong> {props.notes}
               </span>
             </div>
+            <div className="info-item">
+              <span>
+                <p>
+                  <strong>Trạng thái:</strong>{" "}
+                  {statusMap[props.status] || props.status}
+                </p>
+              </span>
+            </div>
+            <div className="info-item"></div>
           </div>
         </div>
       </div>

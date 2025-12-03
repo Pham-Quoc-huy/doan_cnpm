@@ -86,8 +86,10 @@ const SiderbarPet = (props) => {
       setError("Cân nặng phải là một số lớn hơn 0 (hoặc để trống)");
       return;
     }
-
-    setLoading(true);
+    if (imageFile) {
+    setFormData.imageUrl("image", imageFile); // đính kèm file
+  }
+    setLoading(true); 
     try {
       // Gửi dữ liệu đi (chỉ gửi các trường cần thiết, tránh gửi các trường có thể gây lỗi nếu rỗng)
       await props.handleSavePet(formData);
@@ -106,6 +108,12 @@ const SiderbarPet = (props) => {
     e.preventDefault();
     props.handleCancelPetForm();
   };
+  const [imageFile, setImageFile] = useState(null);
+  const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  setImageFile(file);
+};
 
   return (
     <div className={`pet-sidebar show`}>
@@ -147,7 +155,6 @@ const SiderbarPet = (props) => {
               name="breed"
               value={formData.breed}
               onChange={handleChange}
-      
               required
             />
           </div>
@@ -213,21 +220,8 @@ const SiderbarPet = (props) => {
           onChange={handleChange}
         ></textarea>
 
-        <label className="pet-form-label">Ảnh URL</label>
-        <input
-          className="pet-form-input"
-          type="text"
-          name="imageUrl"
-          value={formData.imageUrl}
-          onChange={handleChange}
-        />
-
-        {/* preview ảnh */}
-        {formData.imageUrl && (
-          <div className="pet-image-preview">
-            <img src={formData.imageUrl} alt="preview" />
-          </div>
-        )}
+        <label className="pet-form-label">Chọn ảnh</label>
+        <input type="file" accept="image/*" onChange={handleImageChange} />
 
         <div className="sb-footer">
           <button className="save-btn" type="submit" disabled={loading}>

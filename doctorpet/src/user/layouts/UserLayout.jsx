@@ -38,7 +38,7 @@ const UserLayout = () => {
     };
 
     fetchOwners();
-  }, []); 
+  }, []);
   const [userInfo, setUserInfo] = useState({
     name: "",
     address: "",
@@ -144,6 +144,10 @@ const UserLayout = () => {
         {/* Sidebar */}
         <div className="sidebar">
           <div className="profile-section">
+            <div className="notification-icon">
+              <i className="ri-notification-3-line"></i>
+            </div>
+
             <img
               className="avatar"
               src="../public/assets/meme.jpg"

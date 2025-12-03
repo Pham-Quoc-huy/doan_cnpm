@@ -4,11 +4,13 @@ import "../css/Schedule.css";
 
 const Schedule = () => {
   const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("ALL"); // trạng thái lọc
 
-  // Lấy JWT từ localStorage
   const jwt = localStorage.getItem("jwt");
+
   useEffect(() => {
     const fetchAppointments = async () => {
       if (!jwt) {
@@ -30,13 +32,11 @@ const Schedule = () => {
 
         if (response.ok) {
           const data = await response.json();
-          
-
           const appointmentList = data.content || data; 
-        
-          
           setAppointments(appointmentList);
+          setFilteredAppointments(appointmentList); // mặc định hiển thị tất cả
           setError(null);
+          console.log("Appointments từ server:", appointmentList);
         } else if (response.status === 401) {
           setError("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
         } else {
@@ -55,6 +55,21 @@ const Schedule = () => {
     fetchAppointments();
   }, [jwt]);
 
+  // Hàm lọc theo status
+  const handleFilter = (status) => {
+    setStatusFilter(status);
+
+    if (status === "ALL") {
+      setFilteredAppointments(appointments);
+    } else {
+      const filtered = appointments.filter(a => a.status === status);
+      setFilteredAppointments(filtered);
+    }
+  };
+
+  // -----------------------
+  // Render
+  // -----------------------
   if (isLoading) {
     return (
       <div className="schedule">
@@ -71,19 +86,50 @@ const Schedule = () => {
     );
   }
 
-  if (appointments.length === 0) {
-    return (
-      <div className="schedule">
-        <p style={{ color: "gray", marginTop: "20px" }}>Không có lịch hẹn nào.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="schedule">
-      {appointments.map((item) => (
-        <ScheduleItem key={item.id} {...item} />
-      ))}
+      {/* Nút lọc trạng thái */}
+      <div className="filter-buttons" style={{ marginBottom: "15px" }}>
+        <button
+          className={statusFilter === "ALL" ? "active" : ""}
+          onClick={() => handleFilter("ALL")}
+        >
+          Tất cả
+        </button>
+        <button
+          className={statusFilter === "PENDING" ? "active" : ""}
+          onClick={() => handleFilter("PENDING")}
+        >
+          Chờ duyệt
+        </button>
+        <button
+          className={statusFilter === "APPROVED" ? "active" : ""}
+          onClick={() => handleFilter("APPROVED")}
+        >
+          Đã duyệt
+        </button>
+        <button
+          className={statusFilter === "REJECTED" ? "active" : ""}
+          onClick={() => handleFilter("REJECTED")}
+        >
+          Từ chối
+        </button>
+        <button
+          className={statusFilter === "RESCHEDULED" ? "active" : ""}
+          onClick={() => handleFilter("RESCHEDULED")}
+        >
+          Đổi lịch
+        </button>
+      </div>
+
+      {/* Danh sách lịch hẹn */}
+      {filteredAppointments.length === 0 ? (
+        <p style={{ color: "gray" }}>Không có lịch hẹn phù hợp.</p>
+      ) : (
+        filteredAppointments.map((item) => (
+          <ScheduleItem key={item.id} {...item} />
+        ))
+      )}
     </div>
   );
 };

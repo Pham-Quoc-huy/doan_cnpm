@@ -20,11 +20,17 @@ body {
 
 /* Profile */
 .profile-section {
+  position: relative;
   width: 100%;
   padding: 10px;
   text-align: center;
 }
-
+.profile-section .notification-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
 .avatar {
   width: 100px;
   height: 100px;

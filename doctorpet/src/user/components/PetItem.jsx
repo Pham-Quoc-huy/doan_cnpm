@@ -28,7 +28,7 @@ const PetItem = (props) => {
         </div>
       )}
 
-      <img className="pet-avatar" src={props.imageUrl} alt="pet" />
+      <img className="pet-avatar" src={props.imageUrl} alt={props.name || "pet"} />
 
       <div className="pet-info-profile">
         <div className="pet-field">{props.name}</div>
