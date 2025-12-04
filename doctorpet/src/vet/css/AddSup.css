@@ -1,160 +1,146 @@
-/* AddSup.css - Giao diện thêm trợ lý gọn đẹp, hiện đại */
+/* AddSup.css - Giao diện Thêm/Cập nhật Trợ lý - Đẹp, gọn, chuyên nghiệp */
+
 .main-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-}
-.add-sup-container {
-    position: absolute;
-    background-color: white;
-    z-index: 1000;
-    top: 10px;
-    right: 10px;
-    max-width: 400px;
-    width: 100%;
-    padding: 32px 40px;
-    border-radius: 18px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e8ecef;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.add-sup-container h2 {
-    text-align: center;
-    margin-bottom: 28px;
-    color: #2c3e50;
-    font-size: 28px;
-    font-weight: 600;
-    position: relative;
-}
-
-.add-sup-container h2::after {
-    content: '';
-    width: 80px;
-    height: 4px;
-    background: linear-gradient(90deg, #f5e9c7, #f7e5b2);
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 2px;
-}
-
-.form-message {
-    text-align: center;
-    padding: 14px;
-    margin-bottom: 20px;
-    border-radius: 10px;
-    font-weight: 500;
-    background: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeaa7;
-    font-size: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 20px;
+  background-color:rgba(211, 4, 4, 0.1) ;
+  width: 100%;
+  height: 100%;
 }
 
 .sup-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  padding: 40px 44px;
+  border-radius: 20px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e8ecef;
 }
 
-/* Dòng 2 input nằm ngang: Họ + Tên */
+/* Tiêu đề (tự động thêm nếu cần) */
+.sup-form::before {
+  content: attr(data-title);
+  display: block;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2d3436;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.sup-form::before::after {
+  content: '';
+  width: 90px;
+  height: 5px;
+  background: linear-gradient(90deg, #ffefc5, #f7e5b2);
+  border-radius: 3px;
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Dòng Họ + Tên nằm ngang */
 .name-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
 }
 
 /* Input chung */
 .sup-form input {
-    padding: 14px 18px;
-    border: 2px solid #dfe6e9;
-    border-radius: 12px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    background-color: #f8fffc;
-    width: 100%;
+  width: 100%;
+  padding: 15px 18px;
+  border: 2px solid #e7e9df;
+  border-radius: 14px;
+  font-size: 16px;
+  background-color: #fffff8;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sup-form input:focus {
-    outline: none;
-    border-color: #f7e5b2;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px #f3dd9fb4;
-    transform: translateY(-1px);
+  outline: none;
+  border-color: #f7e5b2;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 5px #f7e5b27d;
+  transform: translateY(-2px);
 }
 
 .sup-form input::placeholder {
-    color: #636e72;
-    font-weight: 500;
+  color: #636e72;
+  font-weight: 500;
 }
 
-/* Nút hành động */
-.button-group {
-    display: flex;
-    gap: 14px;
-    margin-top: 10px;
+/* Khoảng cách giữa các input */
+.sup-form > input,
+.sup-form > .name-row {
+  margin-bottom: 20px;
 }
 
-.sup-form button {
-    flex: 1;
-    padding: 15px;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+/* Nhóm nút bấm */
+.sup-form > button {
+  width: 100%;
+  padding: 16px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.sup-form button[type="submit"] {
-    background: linear-gradient(135deg, #f6e8c4, #f5d47b);
-    color: white;
-    box-shadow: 0 4px 15px #f7e5b297;
+/* Nút chính (Thêm / Cập nhật) */
+.sup-form > button[type="submit"] {
+  background: linear-gradient(135deg, #f9eac3, #fae4a8);
+  color: white;
+  box-shadow: 0 6px 14px #f8e8bd;
+  margin-top: 24px;
+  order: 1;
 }
 
-.sup-form button[type="submit"]:hover {
-    background: linear-gradient(135deg, #f1e3bd, #e0c069);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px #f7e5b2a7;
+.sup-form > button[type="submit"]:hover {
+  background: linear-gradient(135deg, #d7c391, #e6cc86);
+  transform: translateY(-4px);
 }
 
-.sup-form button[type="button"] {
-    background-color: #f1f2f6;
-    color: #636e72;
-    border: 1px solid #dfe6e9;
+/* Nút Hủy */
+.sup-form > button[type="button"] {
+  background-color: #f8f9fa;
+  color: #636e72;
+  border: 2px solid #dfe6e9;
+  order: 2;
 }
 
-.sup-form button[type="button"]:hover {
-    background-color: #dfe4ea;
-    color: #2d3436;
-    transform: translateY(-2px);
+.sup-form > button[type="button"]:hover {
+  background-color: #e9ecef;
+  color: #2d3436;
+  transform: translateY(-2px);
+  border-color: #b2bec3;
 }
 
-/* Responsive */
-@media (max-width: 640px) {
-  .add-sup-container {
-    margin: 20px;
-    padding: 28px 24px;
+/* Responsive: mobile thì Họ + Tên xuống dòng */
+@media (max-width: 560px) {
+  .main-container {
+    padding: 20px 15px;
+  }
+
+  .sup-form {
+    padding: 32px 28px;
     border-radius: 16px;
   }
 
   .name-row {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .button-group {
-    flex-direction: column;
-  }
-
-  .sup-form button {
-    padding: 14px;
+  .sup-form::before {
+    font-size: 24px;
   }
 }

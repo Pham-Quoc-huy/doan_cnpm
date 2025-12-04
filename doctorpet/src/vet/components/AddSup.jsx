@@ -66,8 +66,35 @@ const AddSup = (props) => {
   return (
     <div className="main-container">
 
-
       <form onSubmit={handleSubmit} className="sup-form">
+
+        <div className="name-row">
+          <input
+            type="text"
+            name="firstName"
+            placeholder="Họ"
+            value={form.firstName}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="lastName"
+            placeholder="Tên"
+            value={form.lastName}
+            onChange={handleChange}
+          />
+        </div>
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
+        />
+
         <input
           type="text"
           name="login"
@@ -77,44 +104,7 @@ const AddSup = (props) => {
           required
         />
 
-        <form onSubmit={handleSubmit} className="sup-form">
-
-          <div className="name-row">
-            <input
-              type="text"
-              name="firstName"
-              placeholder="Họ"
-              value={form.firstName}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              name="lastName"
-              placeholder="Tên"
-              value={form.lastName}
-              onChange={handleChange}
-            />
-          </div>
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="text"
-            name="login"
-            placeholder="Tên đăng nhập"
-            value={form.login}
-            onChange={handleChange}
-            required
-          />
-
+        {!props.assistant && (
           <input
             type="password"
             name="password"
@@ -123,12 +113,12 @@ const AddSup = (props) => {
             onChange={handleChange}
             required
           />
+        )}
 
-          <button type="submit">{props.assistant ? "Cập nhật" : "Thêm"}</button>
-          <button type="button" onClick={props.onCancel}>
-            Hủy
-          </button>
-        </form>
+        <button type="submit">{props.assistant ? "Cập nhật" : "Thêm"}</button>
+        <button type="button" onClick={props.onCancel}>
+          Hủy
+        </button>
       </form>
     </div >
   );
