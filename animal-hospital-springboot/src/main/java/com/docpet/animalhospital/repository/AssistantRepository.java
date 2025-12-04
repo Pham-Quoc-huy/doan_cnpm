@@ -21,7 +21,7 @@ public interface AssistantRepository extends JpaRepository<Assistant, Long> {
     @Query("select assistant from Assistant assistant left join fetch assistant.user where assistant.id = ?1")
     Optional<Assistant> findByIdWithUser(Long id);
     
-    @Query("select assistant from Assistant assistant left join fetch assistant.user")
+    @Query("select distinct assistant from Assistant assistant left join fetch assistant.user")
     List<Assistant> findAllWithUser();
     
     default Optional<Assistant> findFirstByUser_Login(String login) {

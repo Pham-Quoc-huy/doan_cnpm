@@ -66,7 +66,7 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
   };
 
   // DUYỆT LỊCH - UI
-  const handleApprove = async (appointmentId) => {
+  const handleApprove = async () => {
     const ask = await Swal.fire({
       title: "Phân công trợ lý?",
       text: "Bạn có muốn chọn trợ lý hỗ trợ?",
@@ -78,7 +78,7 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
 
     // Nếu không chọn phân công trợ lý
     if (!ask.isConfirmed) {
-      await approveAppointment(appointmentId, null, ""); // approve mà không có trợ lý
+      await approveAppointment(null, ""); // approve mà không có trợ lý
       return;
     }
 
@@ -88,6 +88,31 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
         headers: { Authorization: `Bearer ${vetToken}` },
       });
       const assistants = await res.json();
+
+      // Log để kiểm tra cấu trúc dữ liệu
+      if (assistants.length > 0) {
+        console.log("Cấu trúc assistant đầu tiên:", assistants[0]);
+        console.log("Tất cả các fields:", Object.keys(assistants[0]));
+      }
+
+      // Tạo map để lưu assistantId
+      // API có thể trả về id là userId, cần tìm field chứa assistantId
+      const assistantMap = new Map();
+      assistants.forEach((a) => {
+        // Thử các field có thể chứa assistantId
+        // Ưu tiên: assistantId > assistant_id > id (nếu id là assistantId)
+        const assistantId = a.assistantId || a.assistant_id;
+
+        // Nếu không có field assistantId riêng, có thể id chính là assistantId
+        // Hoặc cần gọi API khác để lấy assistantId từ userId
+        if (assistantId) {
+          assistantMap.set(a.id.toString(), assistantId);
+        } else {
+          // Nếu không có field assistantId, giả định id chính là assistantId
+          // (nhưng cần xác nhận với backend)
+          assistantMap.set(a.id.toString(), a.id);
+        }
+      });
 
       const optionsHtml = assistants
         .map(
@@ -104,16 +129,26 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
       `,
         focusConfirm: false,
         preConfirm: () => ({
-          assistantId: document.getElementById("assistantSelect").value,
+          selectedUserId: document.getElementById("assistantSelect").value,
           note: document.getElementById("noteInput").value,
         }),
       });
 
       if (formData) {
-        console.log("Gửi lên:", formData.assistantId, formData.note);
+        // Lấy assistantId từ map dựa trên userId được chọn
+        const selectedUserId = formData.selectedUserId;
+        const assistantId = assistantMap.get(selectedUserId);
 
-        await fetch(
-          `http://localhost:8080/api/vet/appointments/3/assign-assistant`,
+        if (!assistantId) {
+          Swal.fire("Lỗi!", "Không tìm thấy assistantId", "error");
+          return;
+        }
+
+        console.log("Gửi lên:", { assistantId, note: formData.note });
+
+        // Phân công assistant
+        const assignRes = await fetch(
+          `http://localhost:8080/api/vet/appointments/${appointmentId}/assign-assistant`,
           {
             method: "POST",
             headers: {
@@ -121,13 +156,19 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
               Authorization: `Bearer ${vetToken}`,
             },
             body: JSON.stringify({
-              assistantId: 3,
-              note: formData.note,
+              assistantId: parseInt(assistantId),
+              notes: formData.note || "",
             }),
           }
         );
 
-        Swal.fire("Thành công!", "Đã phân công trợ lý.", "success");
+        if (!assignRes.ok) {
+          const errorText = await assignRes.text();
+          throw new Error(errorText || "Phân công trợ lý thất bại");
+        }
+
+        // Sau khi phân công xong, approve appointment với assistantId
+        await approveAppointment(parseInt(assistantId), formData.note || "");
       }
     } catch (err) {
       Swal.fire("Lỗi!", err.message, "error");

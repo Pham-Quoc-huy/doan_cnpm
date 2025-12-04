@@ -9,6 +9,7 @@ import com.docpet.animalhospital.service.AssistantService;
 import com.docpet.animalhospital.service.MailService;
 import com.docpet.animalhospital.service.UserService;
 import com.docpet.animalhospital.service.dto.AdminUserDTO;
+import com.docpet.animalhospital.service.dto.AssistantWithUserDTO;
 import com.docpet.animalhospital.web.rest.errors.BadRequestAlertException;
 import com.docpet.animalhospital.web.rest.errors.EmailAlreadyUsedException;
 import com.docpet.animalhospital.web.rest.errors.InvalidPasswordException;
@@ -70,26 +71,42 @@ public class VetAssistantController {
     }
 
     @GetMapping("/assistants")
-    public ResponseEntity<List<AdminUserDTO>> getAllAssistants() {
+    public ResponseEntity<List<AssistantWithUserDTO>> getAllAssistants() {
         LOG.debug("REST request to get all Assistants for current Vet");
         
-        // Lấy tất cả assistants từ bảng assistant với eager loading user
-        List<Assistant> assistants = assistantRepository.findAllWithUser();
-        List<AdminUserDTO> assistantDTOs = assistants.stream()
-            .filter(assistant -> assistant.getUser() != null)
-            .map(assistant -> new AdminUserDTO(assistant.getUser()))
-            .collect(Collectors.toList());
+        try {
+            // Lấy tất cả assistants từ bảng assistant với eager loading user
+            List<Assistant> assistants = assistantRepository.findAllWithUser();
+            LOG.debug("Found {} assistants", assistants.size());
             
-        return ResponseEntity.ok().body(assistantDTOs);
+            List<AssistantWithUserDTO> assistantDTOs = assistants.stream()
+                .filter(assistant -> assistant.getUser() != null)
+                .map(assistant -> {
+                    try {
+                        return new AssistantWithUserDTO(assistant.getId(), assistant.getUser());
+                    } catch (Exception e) {
+                        LOG.error("Error creating AssistantWithUserDTO for assistant id: {}", assistant.getId(), e);
+                        return null;
+                    }
+                })
+                .filter(dto -> dto != null)
+                .collect(Collectors.toList());
+            
+            LOG.debug("Returning {} assistant DTOs", assistantDTOs.size());
+            return ResponseEntity.ok().body(assistantDTOs);
+        } catch (Exception e) {
+            LOG.error("Error getting all assistants", e);
+            throw new BadRequestAlertException("Error getting assistants: " + e.getMessage(), ENTITY_NAME, "error");
+        }
     }
 
     @GetMapping("/assistants/{id}")
-    public ResponseEntity<AdminUserDTO> getAssistant(@PathVariable Long id) {
+    public ResponseEntity<AssistantWithUserDTO> getAssistant(@PathVariable Long id) {
         LOG.debug("REST request to get Assistant : {}", id);
         
         Optional<Assistant> assistant = assistantRepository.findByIdWithUser(id);
         if (assistant.isPresent() && assistant.get().getUser() != null) {
-            return ResponseEntity.ok().body(new AdminUserDTO(assistant.get().getUser()));
+            return ResponseEntity.ok().body(new AssistantWithUserDTO(assistant.get().getId(), assistant.get().getUser()));
         }
         
         return ResponseEntity.notFound().build();
