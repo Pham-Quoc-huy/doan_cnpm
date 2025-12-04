@@ -63,7 +63,7 @@ const VetLayout = () => {
       setVetInfo((prev) => ({
         ...prev,
         id: matchedVet.id,
-        specialization: matchedVet.specialization ||"",
+        specialization: matchedVet.specialization || "",
         license_no: matchedVet.licenseNo || "",
       }));
     }
@@ -101,7 +101,6 @@ const VetLayout = () => {
               value={vetInfo.license_no}
               readOnly
             />
-
           </div>
 
           {/* Menu */}
@@ -131,9 +130,15 @@ const VetLayout = () => {
 
         {/* Main content */}
         <div className="main-content">
-          {active === "appointment" && <VetAppointment vetId={vetInfo.id} />}
-          {active === "schedule" && <VetSchedule vetId={vetInfo.id} />}
-          {active === "profile" && <VetProfileSup vetId={vetInfo.id} />}
+          {active === "appointment" && (
+            <VetAppointment vetId={vetInfo.id} nameVet={vetInfo.name} />
+          )}
+          {active === "schedule" && (
+            <VetSchedule vetId={vetInfo.id} nameVet={vetInfo.name} />
+          )}
+          {active === "profile" && (
+            <VetProfileSup vetId={vetInfo.id} nameVet={vetInfo.name} />
+          )}
         </div>
       </div>
     </>

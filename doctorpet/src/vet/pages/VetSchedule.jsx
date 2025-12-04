@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import ScheduleItem from "../components/ScheduleItem";
 import DetailAppointment from "../components/DetailAppointment";
 
-const VetSchedule = ({ vetId }) => {
+const VetSchedule = ({ vetId, nameVet }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("TODAY"); // Tab mặc định là hôm nay
   const [detailId, setDetailId] = useState(null);
   const jwt = localStorage.getItem("jwt");
-
   useEffect(() => {
     if (!jwt) return;
 
@@ -109,8 +108,10 @@ const VetSchedule = ({ vetId }) => {
                 key={item.id}
                 id={item.id}
                 pet={item.pet}
+                nameVet={nameVet}
                 vet={item.vet}
                 timeStart={item.timeStart}
+                status={item.status}
                 appointmentType={item.appointmentType}
                 locationType={item.locationType}
                 type={item.type}

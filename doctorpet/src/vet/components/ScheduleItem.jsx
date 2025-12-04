@@ -12,7 +12,7 @@ const ScheduleItem = (props) => {
               <div className="pet-avatar">{props.pet.name}</div>
               <div>
                 <h3 className="pet-name">{props.pet.name}</h3>
-                <p className="pet-vet">với {props.vet.name}</p>
+                <p className="pet-vet">với B.sĩ: {props.nameVet}</p>
               </div>
             </div>
             <div className="column">
@@ -40,7 +40,14 @@ const ScheduleItem = (props) => {
                 style={{ color: "#2563eb" }}
               ></i>
               <span>
-                <strong>Thời gian:</strong> {props.timeStart}
+                <strong>Thời gian:</strong>{" "}
+                {new Date(props.timeStart).toLocaleString("vi-VN", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </span>
             </div>
 

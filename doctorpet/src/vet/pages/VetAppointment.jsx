@@ -6,7 +6,6 @@ import DetailAppointment from "../components/DetailAppointment";
 const VetAppointment = (props) => {
   const [appointments, setAppointments] = useState([]);
   const jwt = localStorage.getItem("jwt");
-
   useEffect(() => {
     if (!jwt) return;
 
@@ -54,6 +53,7 @@ const VetAppointment = (props) => {
               pet={item.pet}
               vet={item.vet}
               timeStart={item.timeStart}
+              status={item.status}
               appointmentType={item.appointmentType}
               locationType={item.locationType}
               type={item.type}
