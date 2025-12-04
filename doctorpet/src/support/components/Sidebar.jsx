@@ -17,7 +17,6 @@ const Sidebar = () => {
         // 1. Lấy thông tin user từ localStorage
         const savedUser = localStorage.getItem("user");
         // Lấy JWT từ localStorage (không dùng ở đây nhưng cần cho hàm updateOwner)
-        const jwt = localStorage.getItem("jwt");
         if (savedUser) {
             const user = JSON.parse(savedUser);
 

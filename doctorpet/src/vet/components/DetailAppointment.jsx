@@ -25,6 +25,7 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
 
         const data = await res.json();
         setAppointment(data);
+        console.log("Chi tiết appointment:", data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -65,7 +66,7 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
   };
 
   // DUYỆT LỊCH - UI
-  const handleApprove = async () => {
+  const handleApprove = async (appointmentId) => {
     const ask = await Swal.fire({
       title: "Phân công trợ lý?",
       text: "Bạn có muốn chọn trợ lý hỗ trợ?",
@@ -75,29 +76,32 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
       cancelButtonText: "Không",
     });
 
+    // Nếu không chọn phân công trợ lý
     if (!ask.isConfirmed) {
-      approveAppointment(null, "");
+      await approveAppointment(appointmentId, null, ""); // approve mà không có trợ lý
       return;
     }
 
-    // Lấy danh sách trợ lý
     try {
+      // Lấy danh sách trợ lý
       const res = await fetch("http://localhost:8080/api/vets/assistants", {
         headers: { Authorization: `Bearer ${vetToken}` },
       });
-
       const assistants = await res.json();
-      console.log("Assistants:", assistants);
+
       const optionsHtml = assistants
-        .map((a) => `<option value="${a.id}">${a.firstName} ${a.lastName}</option>`)
+        .map(
+          (a) => `<option value="${a.id}">${a.firstName} ${a.lastName}</option>`
+        )
         .join("");
 
+      // Hiển thị Swal chọn trợ lý + ghi chú
       const { value: formData } = await Swal.fire({
         title: "Chọn trợ lý & ghi chú",
         html: `
-          <select id="assistantSelect" class="swal2-select">${optionsHtml}</select>
-          <textarea id="noteInput" class="swal2-textarea" placeholder="Ghi chú..."></textarea>
-        `,
+        <select id="assistantSelect" class="swal2-select">${optionsHtml}</select>
+        <textarea id="noteInput" class="swal2-textarea" placeholder="Ghi chú..."></textarea>
+      `,
         focusConfirm: false,
         preConfirm: () => ({
           assistantId: document.getElementById("assistantSelect").value,
@@ -106,14 +110,31 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
       });
 
       if (formData) {
-        approveAppointment(formData.assistantId, formData.note);
+        console.log("Gửi lên:", formData.assistantId, formData.note);
+
+        await fetch(
+          `http://localhost:8080/api/vet/appointments/3/assign-assistant`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${vetToken}`,
+            },
+            body: JSON.stringify({
+              assistantId: 3,
+              note: formData.note,
+            }),
+          }
+        );
+
+        Swal.fire("Thành công!", "Đã phân công trợ lý.", "success");
       }
     } catch (err) {
       Swal.fire("Lỗi!", err.message, "error");
     }
   };
 
-  // TỪ CHỐI 
+  // TỪ CHỐI
   const handleReject = async () => {
     const ask = await Swal.fire({
       title: "Đổi lịch mới?",
@@ -124,7 +145,7 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
       cancelButtonText: "Không",
     });
 
-    // 
+    //
     if (!ask.isConfirmed) {
       const { value: reason } = await Swal.fire({
         title: "Nhập lý do từ chối",
@@ -161,7 +182,7 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
       return;
     }
 
-    // 
+    //
     const { value: newDate } = await Swal.fire({
       title: "Chọn ngày giờ mới",
       html: `<input type="datetime-local" id="dateInput" class="swal2-input">`,
@@ -198,7 +219,7 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
       Swal.fire("Lỗi!", err.message, "error");
     }
   };
-  // UI 
+  // UI
   if (loading) return <div>Đang tải chi tiết lịch hẹn...</div>;
   if (error) return <div style={{ color: "red" }}>{error}</div>;
   if (!appointment) return <div>Không tìm thấy lịch hẹn.</div>;
@@ -207,22 +228,130 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
 
   return (
     <div className="appointment-detail">
-      <button className="back-btn" onClick={onBack}>⬅️ Quay lại</button>
+      {/* Nút quay lại */}
+      <button className="back-btn" onClick={onBack}>
+        <i className="ri-arrow-left-line"></i> Quay lại
+      </button>
 
       <h2>Chi tiết lịch hẹn</h2>
 
-      <p><strong>ID:</strong> {appointment.id}</p>
-      <p><strong>Trạng thái:</strong> {appointment.status}</p>
-      <p><strong>Bắt đầu:</strong> {new Date(appointment.timeStart).toLocaleString()}</p>
-      <p><strong>Kết thúc:</strong> {new Date(appointment.timeEnd).toLocaleString()}</p>
+      {/* Thông tin cơ bản */}
+      <div className="row">
+        <p>
+          <strong>Trạng thái:</strong>{" "}
+          {appointment.status === "PENDING"
+            ? "Chờ duyệt"
+            : appointment.status === "APPROVED"
+            ? "Đã duyệt"
+            : appointment.status === "REJECTED"
+            ? "Từ chối"
+            : "Đổi lịch"}
+        </p>
+        <p>
+          <strong>Bắt đầu:</strong>{" "}
+          {new Date(appointment.timeStart).toLocaleString()}
+        </p>
+        <p>
+          <strong>Kết thúc:</strong>{" "}
+          {new Date(appointment.timeEnd).toLocaleString()}
+        </p>
+      </div>
+      <div className="row">
+        <p>
+          <strong>Loại lịch hẹn:</strong>{" "}
+          {appointment.type === "CHECKUP"
+            ? "Kiểm tra sức khỏe"
+            : appointment.type === "VACCINE"
+            ? "Tiêm chủng"
+            : "Phẫu thuật"}
+        </p>
+        <p>
+          <strong>Tình trạng:</strong>{" "}
+          {appointment.appointmentType === "EMERGENCY"
+            ? "Khẩn Cấp"
+            : "Bình Thường"}
+        </p>
+        <p>
+          <strong>Vị trí:</strong>{" "}
+          {appointment.locationType === "AT_HOME"
+            ? "Tại nhà"
+            : appointment.locationType === "AT_CLINIC"
+            ? "Tại phòng khám"
+            : ""}
+        </p>
+      </div>
+      <p>
+        <strong>Ghi chú:</strong> {appointment.notes || "Không có"}
+      </p>
 
-      <p><strong>Pet:</strong> {appointment.pet?.name}</p>
-      <p><strong>Chủ nuôi:</strong> {appointment.owner?.name}</p>
-      <p><strong>Ghi chú:</strong> {appointment.notes || "Không có"}</p>
+      {/* Thông tin Pet */}
+      <div className="row">
+        {appointment.pet && (
+          <div>
+            <h3>Thông tin thú cưng</h3>
+            <div className="row">
+              <p>
+                <strong>Tên:</strong> {appointment.pet.name}
+              </p>
+              <p>
+                <strong>Loài:</strong> {appointment.pet.species}
+              </p>
+            </div>
+            <div className="row">
+              <p>
+                <strong>Giống loài:</strong> {appointment.pet.breed}
+              </p>
+              <p>
+                <strong>Giới tính:</strong> {appointment.pet.sex}
+              </p>
+            </div>
+            <div className="row">
+              <p>
+                <strong>Ngày sinh:</strong> {appointment.pet.dateOfBirth}
+              </p>
+              <p>
+                <strong>Cân nặng:</strong> {appointment.pet.weight} kg
+              </p>
+            </div>
+            <div className="row">
+              <p>
+                <strong>Dị ứng:</strong>{" "}
+                {appointment.pet.allergies || "Không có"}
+              </p>
+              <p>
+                <strong>Ghi chú:</strong> {appointment.pet.notes || "Không có"}
+              </p>
+            </div>
+          </div>
+        )}
 
-      {/* BUTTON */}
+        {/* Thông tin chủ nuôi */}
+        {appointment.owner && (
+          <div>
+            <h3>Thông tin chủ nuôi</h3>
+            <p>
+              <strong>Tên:</strong> {appointment.owner.name}
+            </p>
+            <p>
+              <strong>Họ và tên:</strong> {appointment.owner.firstName}{" "}
+              {appointment.owner.lastName}
+            </p>
+            <p>
+              <strong>Số điện thoại:</strong> {appointment.owner.phone}
+            </p>
+            <p>
+              <strong>Địa chỉ:</strong> {appointment.owner.address}
+            </p>
+          </div>
+        )}
+      </div>
+      {/* Buttons */}
       <div className="btn-group">
-        <button className="approve" disabled={!isPending} onClick={handleApprove}>
+        <button
+          className="approve"
+          disabled={!isPending}
+          onClick={handleApprove}
+        >
           Duyệt lịch
         </button>
 

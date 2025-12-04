@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import "../css/AppointmentList.css";
 import { useNavigate } from "react-router-dom";
-import { formatDateTime, getLocation, getBadgeClass } from '../components/appointmentFormatter';
+import {
+  formatDateTime,
+  getBadgeClass,
+} from "../components/appointmentFormatter";
 const AppointmentList = () => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
@@ -20,12 +23,14 @@ const AppointmentList = () => {
 
       const res = await fetch("http://localhost:8080/api/appointments", {
         headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
-      );
       const data = await res.json();
-
+      console.log("Lịch hẹn đã fetch:", data);
       setAppointments(data); // data là mảng nhiều lịch
     } catch (err) {
       console.error("Lỗi fetch:", err);
@@ -38,7 +43,6 @@ const AppointmentList = () => {
     fetchAppointments();
   }, []);
 
-
   const onDetailClick = (appointment) => {
     navigate(`appointment/${appointment.id}`);
   };
@@ -46,7 +50,6 @@ const AppointmentList = () => {
   return (
     <div className="main-content">
       <div className="content-wrapper">
-
         {loading ? (
           <p>Đang tải dữ liệu...</p>
         ) : appointments.length === 0 ? (
@@ -59,17 +62,28 @@ const AppointmentList = () => {
                   <div className="pet-avatar">{app.pet.name[0]}</div>
                   <div>
                     <h3 className="pet-name">{app.pet.name}</h3>
-                    <p className="pet-vet">với BS: {app.vet.lastName + " " + app.vet.firstName}</p>
+                    <p className="pet-vet">
+                      với BS: {app.vet.lastName + " " + app.vet.firstName}
+                    </p>
                   </div>
                 </div>
-                <div className={`appointmentType ${getBadgeClass(app.appointmentType)}`}>
-                  {app.appointmentType === "EMERGENCY" ? "KHẨN CẤP" : "Bình Thường"}
+                <div
+                  className={`appointmentType ${getBadgeClass(
+                    app.appointmentType
+                  )}`}
+                >
+                  {app.appointmentType === "EMERGENCY"
+                    ? "KHẨN CẤP"
+                    : "Bình Thường"}
                 </div>
               </div>
 
               <div className="info-grid">
                 <div className="info-item">
-                  <i className="ri-calendar-line icon" style={{ color: "#2563eb" }}></i>
+                  <i
+                    className="ri-calendar-line icon"
+                    style={{ color: "#2563eb" }}
+                  ></i>
                   <span>
                     <strong>Thời gian:</strong> {formatDateTime(app.timeStart)}
                   </span>
@@ -117,7 +131,11 @@ const AppointmentList = () => {
                   onMouseEnter={() => setEye(app.id)}
                   onMouseLeave={() => setEye(null)}
                 >
-                  <i className={eye === app.id ? "ri-eye-line" : "ri-eye-off-line"}></i>
+                  <i
+                    className={
+                      eye === app.id ? "ri-eye-line" : "ri-eye-off-line"
+                    }
+                  ></i>
                   Xem chi tiết
                 </button>
               </div>
@@ -130,4 +148,3 @@ const AppointmentList = () => {
 };
 
 export default AppointmentList;
-

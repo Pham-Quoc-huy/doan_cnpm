@@ -47,6 +47,8 @@ const Login = () => {
         window.location.href = "/user";
       } else if (authorities.includes("ROLE_DOCTOR")) {
         window.location.href = "/vet";
+      } else if (authorities.includes("ROLE_ASSISTANT")) {
+        window.location.href = "/support";
       } else {
         window.location.href = "/";
       }

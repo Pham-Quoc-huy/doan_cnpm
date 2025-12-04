@@ -1,8 +1,7 @@
-
 import "../css/ScheduleItem.css";
 const ScheduleItem = (props) => {
-    const handleViewDetail = () => {
-    props.onDetail(props.id);  // báo lên parent
+  const handleViewDetail = () => {
+    props.onDetail(props.id); // báo lên parent
   };
   return (
     <>
@@ -24,7 +23,7 @@ const ScheduleItem = (props) => {
               >
                 <p>
                   {props.appointmentType === "EMERGENCY"
-                    ? "KHẨN CẤP"
+                    ? "Khẩn Cấp"
                     : "Bình Thường"}
                 </p>
               </div>
@@ -56,7 +55,12 @@ const ScheduleItem = (props) => {
                 }`}
               ></i>
               <span>
-                <strong>Hình thức:</strong> {props.locationType}
+                <strong>Hình thức:</strong>{" "}
+                {props.locationType === "AT_HOME"
+                  ? "Tại nhà"
+                  : props.locationType === "AT_CLINIC"
+                  ? "Tại phòng khám"
+                  : ""}
               </span>
             </div>
             <div className={`type `}>
@@ -64,7 +68,12 @@ const ScheduleItem = (props) => {
                 className="ri-stethoscope-line"
                 style={{ color: "#0ea5e9" }}
               ></i>
-              <strong> Loại khám: </strong> {props.type}
+              <strong> Loại khám: </strong> {""}
+              {props.type === "CHECKUP"
+                ? "Kiểm tra sức khỏe"
+                : props.type === "VACCINE"
+                ? "Tiêm chủng"
+                : "Phẫu thuật"}
             </div>
           </div>
 
@@ -78,6 +87,17 @@ const ScheduleItem = (props) => {
                 <strong>Ghi chú:</strong> {props.notes}
               </span>
             </div>
+            <div className="info-item">
+              <strong>Trạng thái:</strong>{" "}
+              {props.status === "PENDING"
+                ? "Chờ duyệt"
+                : props.status === "APPROVED"
+                ? "Đã duyệt"
+                : props.status === "REJECTED"
+                ? "Từ chối"
+                : "Đổi lịch"}
+            </div>
+            <div className="info-item"></div>
           </div>
         </div>
       </div>

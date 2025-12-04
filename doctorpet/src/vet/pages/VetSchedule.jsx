@@ -62,7 +62,7 @@ const VetSchedule = ({ vetId }) => {
     <div style={{ width: "100%" }}>
       {/* NAV / Tabs */}
       {!detailId && (
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+        <div>
           <button className={`btn-tab ${activeTab === "TODAY" ? "active" : ""}`}
             onClick={() => setActiveTab("TODAY")}
           >
@@ -89,6 +89,7 @@ const VetSchedule = ({ vetId }) => {
       {/* Chi tiết appointment */}
       {detailId ? (
         <DetailAppointment
+         data = {appointments}
           appointmentId={detailId}
           onBack={() => setDetailId(null)}
           onApproved={(updated) => {

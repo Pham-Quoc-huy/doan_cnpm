@@ -11,7 +11,7 @@
 }
 
 .appointment-detail {
-  max-width: 980px;
+  max-width: 100%;
   padding: 18px;
   background: linear-gradient(180deg, var(--card), var(--glass));
   border-radius: 12px;
@@ -19,8 +19,10 @@
   box-shadow: 0 8px 28px var(--shadow);
 }
 .appointment-detail .row {
-    display: flex;
-    flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px; /* khoảng cách giữa các cột */
+  margin-bottom: 12px;
 }
 
 .back-btn {
@@ -39,12 +41,32 @@
   border-bottom: 2px solid #ff914d
 }
 .appointment-detail p {
-  margin: 8px 0;
-  color: #111827;
+  margin: 5px 0;
+  line-height: 1.5;
 }
-.appointment-detail strong {
-  color: #374151;
+
+/* Tiêu đề card */
+.appointment-detail h3 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  color: #555;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
 }
+
+/* Card riêng cho Pet / Owner / Vet */
+.pet-image-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+.pet-image-preview img {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
 
 .header-row {
   display: flex;
@@ -113,7 +135,22 @@
   color: var(--muted);
   margin-top: 6px;
 }
-
+.btn-group .approve,.btn-group .reject {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #ed8a43, #ffbb00);
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 0px;
+  margin-right: 10px;
+}
+.btn-group .approve:hover,.btn-group .reject:hover {
+  background: white;
+  color: #ff914d;
+  box-shadow: 0 4px 12px rgba(255, 106, 0, 0.4);
+  border-bottom: 2px solid #ff914d
+}
 /* Responsive */
 @media (max-width: 760px) {
   .info-grid {
