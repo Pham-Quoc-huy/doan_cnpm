@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import "../css/AddSup.css";
 const AddSup = (props) => {
@@ -12,8 +12,19 @@ const AddSup = (props) => {
     langKey: "vi",
     authorities: ["ROLE_ASSISTANT"],
   });
-
-  const [message, setMessage] = useState("");
+  useEffect(() => {
+    if (props.assistant) {
+      setForm({
+        login: props.assistant.login || "",
+        password: "", // không bao giờ trả password từ backend
+        firstName: props.assistant.firstName || "",
+        lastName: props.assistant.lastName || "",
+        email: props.assistant.email || "",
+        langKey: "vi",
+        authorities: ["ROLE_ASSISTANT"],
+      });
+    }
+  }, [props.assistant]);
 
   const handleChange = (e) => {
     setForm({
@@ -24,49 +35,47 @@ const AddSup = (props) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await fetch("http://localhost:8080/api/vets/assistants", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-        body: JSON.stringify(form),
-      });
 
-      if (res.status === 201) {
-        Swal.fire({
-          title: "Thêm trợ lý thành công!",
-          icon: "success",
-        });
-        setForm({
-          login: "",
-          password: "",
-          firstName: "",
-          lastName: "",
-          email: "",
-          langKey: "vi",
-          authorities: ["ROLE_ASSISTANT"],
-        });
-      } else {
-        Swal.fire({
-          title: "Thêm thất bại!",
-          icon: "error",
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      setMessage("⚠️ Lỗi kết nối server!");
+    const url = props.assistant
+      ? `http://localhost:8080/api/vets/assistants/${props.assistant.id}`
+      : "http://localhost:8080/api/vets/assistants";
+
+    const method = props.assistant ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+      body: JSON.stringify(form),
+    });
+
+    if (res.ok) {
+      Swal.fire({
+        title: props.assistant ? "Cập nhật thành công!" : "Thêm trợ lý thành công!",
+        icon: "success",
+      });
+      props.onCreated?.();
+    } else {
+      Swal.fire({ title: "Lỗi!", icon: "error" });
     }
   };
+
 
   return (
     <div className="main-container">
 
-      <div className="add-sup-container">
-        <h2>Thêm Trợ Lý</h2>
 
-        {message && <p className="form-message">{message}</p>}
+      <form onSubmit={handleSubmit} className="sup-form">
+        <input
+          type="text"
+          name="login"
+          placeholder="Tên đăng nhập"
+          value={form.login}
+          onChange={handleChange}
+          required
+        />
 
         <form onSubmit={handleSubmit} className="sup-form">
 
@@ -120,8 +129,8 @@ const AddSup = (props) => {
             Hủy
           </button>
         </form>
-      </div>
     </div>
+    </div >
   );
 };
 

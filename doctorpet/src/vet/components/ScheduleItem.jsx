@@ -1,9 +1,9 @@
-
 import "../css/ScheduleItem.css";
 const ScheduleItem = (props) => {
-    const handleViewDetail = () => {
-    props.onDetail(props.id);  // báo lên parent
+  const handleViewDetail = () => {
+    props.onDetail(props.id); // báo lên parent
   };
+  console.log("Schedule Item rendered: ", props);
   return (
     <>
       <div>
@@ -13,7 +13,7 @@ const ScheduleItem = (props) => {
               <div className="pet-avatar">{props.pet.name}</div>
               <div>
                 <h3 className="pet-name">{props.pet.name}</h3>
-                <p className="pet-vet">với {props.vet.name}</p>
+                <p className="pet-vet">với B.sĩ: {props.nameVet }</p>
               </div>
             </div>
             <div className="column">
@@ -24,7 +24,7 @@ const ScheduleItem = (props) => {
               >
                 <p>
                   {props.appointmentType === "EMERGENCY"
-                    ? "KHẨN CẤP"
+                    ? "Khẩn Cấp"
                     : "Bình Thường"}
                 </p>
               </div>
@@ -56,7 +56,12 @@ const ScheduleItem = (props) => {
                 }`}
               ></i>
               <span>
-                <strong>Hình thức:</strong> {props.locationType}
+                <strong>Hình thức:</strong>{" "}
+                {props.locationType === "AT_HOME"
+                  ? "Tại nhà"
+                  : props.locationType === "AT_CLINIC"
+                  ? "Tại phòng khám"
+                  : ""}
               </span>
             </div>
             <div className={`type `}>
@@ -64,7 +69,12 @@ const ScheduleItem = (props) => {
                 className="ri-stethoscope-line"
                 style={{ color: "#0ea5e9" }}
               ></i>
-              <strong> Loại khám: </strong> {props.type}
+              <strong> Loại khám: </strong> {""}
+              {props.type === "CHECKUP"
+                ? "Kiểm tra sức khỏe"
+                : props.type === "VACCINE"
+                ? "Tiêm chủng"
+                : "Phẫu thuật"}
             </div>
           </div>
 
@@ -78,6 +88,17 @@ const ScheduleItem = (props) => {
                 <strong>Ghi chú:</strong> {props.notes}
               </span>
             </div>
+            <div className="info-item">
+              <strong>Trạng thái:</strong>{" "}
+              {props.status === "PENDING"
+                ? "Chờ duyệt"
+                : props.status === "APPROVED"
+                ? "Đã duyệt"
+                : props.status === "REJECTED"
+                ? "Từ chối"
+                : "Đổi lịch"}
+            </div>
+            <div className="info-item"></div>
           </div>
         </div>
       </div>

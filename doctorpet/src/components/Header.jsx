@@ -10,6 +10,17 @@ const Header = () => {
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
+
+    // Hàm logout khi người dùng rời khỏi trang
+    const handleLogout = () => {
+      localStorage.removeItem("jwt");
+      localStorage.removeItem("user");
+    };
+
+    // Cleanup khi component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleLogout);
+    };
   }, []);
 
   return (
