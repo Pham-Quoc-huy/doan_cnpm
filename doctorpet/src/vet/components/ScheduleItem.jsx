@@ -3,6 +3,7 @@ const ScheduleItem = (props) => {
   const handleViewDetail = () => {
     props.onDetail(props.id); // báo lên parent
   };
+  console.log("Schedule Item rendered: ", props);
   return (
     <>
       <div>
@@ -12,7 +13,7 @@ const ScheduleItem = (props) => {
               <div className="pet-avatar">{props.pet.name}</div>
               <div>
                 <h3 className="pet-name">{props.pet.name}</h3>
-                <p className="pet-vet">với {props.vet.name}</p>
+                <p className="pet-vet">với B.sĩ: {props.nameVet }</p>
               </div>
             </div>
             <div className="column">

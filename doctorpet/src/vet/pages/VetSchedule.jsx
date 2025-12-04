@@ -8,6 +8,7 @@ const VetSchedule = ({ vetId }) => {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("TODAY"); // Tab mặc định là hôm nay
   const [detailId, setDetailId] = useState(null);
+  const [selectedDate, setSelectedDate] = useState("");
   const jwt = localStorage.getItem("jwt");
 
   useEffect(() => {
@@ -43,19 +44,30 @@ const VetSchedule = ({ vetId }) => {
   if (error) return <div style={{ color: "red" }}>{error}</div>;
 
   // Filter theo tab
+  function isSameDay(date1, date2) {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  }
   const today = new Date();
   const filteredAppointments = appointments.filter((appt) => {
     const apptDate = new Date(appt.timeStart);
+
     if (activeTab === "TODAY") {
-      return (
-        apptDate.getFullYear() === today.getFullYear() &&
-        apptDate.getMonth() === today.getMonth() &&
-        apptDate.getDate() === today.getDate()
-      );
+      return isSameDay(apptDate, today);
     }
     if (activeTab === "APPROVED") return appt.status === "APPROVED";
     if (activeTab === "REJECTED") return appt.status === "REJECTED";
     if (activeTab === "RESCHEDULED") return appt.status === "RESCHEDULED";
+
+    // Lọc theo ngày
+    if (activeTab === "DATE" && selectedDate) {
+      const picked = new Date(selectedDate);
+      return isSameDay(apptDate, picked);
+    }
+
     return false;
   });
   return (
@@ -63,33 +75,54 @@ const VetSchedule = ({ vetId }) => {
       {/* NAV / Tabs */}
       {!detailId && (
         <div>
-          <button className={`btn-tab ${activeTab === "TODAY" ? "active" : ""}`}
+          <button
+            className={`btn-tab ${activeTab === "TODAY" ? "active" : ""}`}
             onClick={() => setActiveTab("TODAY")}
           >
             Hôm nay
           </button>
-          <button className={`btn-tab ${activeTab === "APPROVED" ? "active" : ""}`}
+          <button
+            className={`btn-tab ${activeTab === "APPROVED" ? "active" : ""}`}
             onClick={() => setActiveTab("APPROVED")}
           >
             Đã duyệt
           </button>
-          <button className={`btn-tab ${activeTab === "REJECTED" ? "active" : ""}`}
+          <button
+            className={`btn-tab ${activeTab === "REJECTED" ? "active" : ""}`}
             onClick={() => setActiveTab("REJECTED")}
           >
             Từ chối
           </button>
-          <button className={`btn-tab ${activeTab === "RESCHEDULED" ? "active" : ""}`}
+          <button
+            className={`btn-tab ${activeTab === "RESCHEDULED" ? "active" : ""}`}
             onClick={() => setActiveTab("RESCHEDULED")}
           >
             Đã đổi lịch
           </button>
+           <button
+            className={`btn-tab ${activeTab === "DATE" ? "active" : ""}`}
+            onClick={() => setActiveTab("DATE")}
+          >
+            Chọn ngày
+          </button>
+          {activeTab === "DATE" && (
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              style={{
+                marginLeft: "10px",
+                padding: "5px",
+              }}
+            />
+          )}
         </div>
       )}
 
       {/* Chi tiết appointment */}
       {detailId ? (
         <DetailAppointment
-         data = {appointments}
+          data={appointments}
           appointmentId={detailId}
           onBack={() => setDetailId(null)}
           onApproved={(updated) => {
@@ -110,9 +143,11 @@ const VetSchedule = ({ vetId }) => {
                 id={item.id}
                 pet={item.pet}
                 vet={item.vet}
+                nameVet={item.vet.name}
                 timeStart={item.timeStart}
                 appointmentType={item.appointmentType}
                 locationType={item.locationType}
+                status={item.status}
                 type={item.type}
                 notes={item.notes}
                 onDetail={(id) => setDetailId(id)}

@@ -113,7 +113,7 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
         console.log("Gửi lên:", formData.assistantId, formData.note);
 
         await fetch(
-          `http://localhost:8080/api/vet/appointments/3/assign-assistant`,
+          `http://localhost:8080/api/vet/appointments/${appointmentId}/assign-assistant`,
           {
             method: "POST",
             headers: {
