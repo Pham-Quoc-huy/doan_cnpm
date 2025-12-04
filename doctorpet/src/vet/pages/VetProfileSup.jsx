@@ -126,13 +126,11 @@ const VetProfileSup = () => {
 
       {/* Form thêm / sửa */}
       {showSidebar && (
-        <div className="sidebar-form">
-          <AddSup
-            assistant={activeAssistant}
-            onCreated={handleSaved}
-            onCancel={() => setShowSidebar(false)}
-          />
-        </div>
+        <AddSup
+          assistant={activeAssistant}
+          onCreated={handleSaved}
+          onCancel={() => setShowSidebar(false)}
+        />
       )}
     </div>
   );

@@ -80,14 +80,11 @@
 
 /* Sidebar form */
 .sidebar-form {
-  position: fixed;
   top: 0;
   right: 0;
   width: 380px;
   height: 100%;
-  background-color: #f9f9f9;
   border-left: 1px solid #ddd;
-  padding: 20px;
   overflow-y: auto;
   box-shadow: -2px 0 10px rgba(0,0,0,0.1);
   z-index: 100;

@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import Swal from "sweetalert2";
+import "../css/AddSup.css";
 const AddSup = (props) => {
   const [form, setForm] = useState({
     login: "",
@@ -60,61 +61,66 @@ const AddSup = (props) => {
   };
 
   return (
-    <div className="add-sup-container">
-      <h2>Thêm Trợ Lý</h2>
+    <div className="main-container">
 
-      {message && <p className="form-message">{message}</p>}
+      <div className="add-sup-container">
+        <h2>Thêm Trợ Lý</h2>
 
-      <form onSubmit={handleSubmit} className="sup-form">
-        <input
-          type="text"
-          name="login"
-          placeholder="Tên đăng nhập"
-          value={form.login}
-          onChange={handleChange}
-          required
-        />
+        {message && <p className="form-message">{message}</p>}
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Mật khẩu"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
+        <form onSubmit={handleSubmit} className="sup-form">
 
-        <input
-          type="text"
-          name="firstName"
-          placeholder="Họ"
-          value={form.firstName}
-          onChange={handleChange}
-          required
-        />
+          <div className="name-row">
+            <input
+              type="text"
+              name="firstName"
+              placeholder="Họ"
+              value={form.firstName}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="lastName"
+              placeholder="Tên"
+              value={form.lastName}
+              onChange={handleChange}
+            />
+          </div>
 
-        <input
-          type="text"
-          name="lastName"
-          placeholder="Tên"
-          value={form.lastName}
-          onChange={handleChange}
-        />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
+          <input
+            type="text"
+            name="login"
+            placeholder="Tên đăng nhập"
+            value={form.login}
+            onChange={handleChange}
+            required
+          />
 
-        <button type="submit">{props.assistant ? "Cập nhật" : "Thêm"}</button>
+          <input
+            type="password"
+            name="password"
+            placeholder="Mật khẩu"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+
+          <button type="submit">{props.assistant ? "Cập nhật" : "Thêm"}</button>
           <button type="button" onClick={props.onCancel}>
             Hủy
           </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
