@@ -1,0 +1,159 @@
+.main-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+.add-sup-container {
+    position: absolute;
+    background-color: white;
+    z-index: 1000;
+    top: 10px;
+    right: 10px;
+    max-width: 400px;
+    width: 100%;
+    padding: 22px 40px;
+    border-radius: 18px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e8ecef;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.add-sup-container h2 {
+    text-align: center;
+    margin-bottom: 28px;
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 600;
+    position: relative;
+}
+
+.add-sup-container h2::after {
+    content: '';
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #f5e9c7, #f7e5b2);
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+
+.form-message {
+    text-align: center;
+    padding: 14px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+    font-size: 15px;
+}
+
+.sup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Dòng 2 input nằm ngang: Họ + Tên */
+.name-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* Input chung */
+.sup-form input {
+    padding: 14px 18px;
+    border: 2px solid #dfe6e9;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background-color: #f8fffc;
+    width: 100%;
+}
+
+.sup-form input:focus {
+    outline: none;
+    border-color: #f7e5b2;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px #f3dd9fb4;
+    transform: translateY(-1px);
+}
+
+.sup-form input::placeholder {
+    color: #636e72;
+    font-weight: 500;
+}
+
+/* Nút hành động */
+.button-group {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.sup-form button {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sup-form button[type="submit"] {
+    background: linear-gradient(135deg, #f8e8c2, #fcdd8a);
+    color: white;
+    box-shadow: 0 4px 15px #f7e5b297;
+}
+
+.sup-form button[type="submit"]:hover {
+    background: linear-gradient(135deg, #d9ca9f, #e0c069);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px #f7e5b2a7;
+}
+
+.sup-form button[type="button"] {
+    background-color: #f1f2f6;
+    color: #636e72;
+    border: 1px solid #dfe6e9;
+}
+
+.sup-form button[type="button"]:hover {
+    background-color: #dfe4ea;
+    color: #2d3436;
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .add-sup-container {
+    margin: 20px;
+    padding: 28px 24px;
+    border-radius: 16px;
+  }
+
+  .name-row {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .sup-form button {
+    padding: 14px;
+  }
+}

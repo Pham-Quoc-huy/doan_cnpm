@@ -7,7 +7,7 @@ const VetProfileSup = () => {
   const [assistants, setAssistants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
- const [editingAssistant, setEditingAssistant] = useState(null);
+  const [editingAssistant, setEditingAssistant] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
 
   const jwt = localStorage.getItem("jwt");
@@ -41,7 +41,7 @@ const VetProfileSup = () => {
   }, []);
 
   const handleAddNew = () => {
-    setEditingAssistant(null); 
+    setEditingAssistant(null);
     setShowSidebar(true);
   };
   const handleEdit = (assistant) => {
@@ -103,15 +103,16 @@ const VetProfileSup = () => {
 
       {/* Form thêm / sửa */}
       {showSidebar && (
-        <div className="sidebar-form">
-          <AddSup
-            assistant={editingAssistant}
-            onCreated={handleSaved}
-            onCancel={() => setShowSidebar(false)}
-          />
-        </div>
-      )}
-    </div>
+
+        <AddSup
+          assistant={editingAssistant}
+          onCreated={handleSaved}
+          onCancel={() => setShowSidebar(false)}
+        />
+
+      )
+      }
+    </div >
   );
 };
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import "../css/AddSup.css";
 const AddSup = (props) => {
   const [form, setForm] = useState({
     login: "",
@@ -19,101 +20,104 @@ const AddSup = (props) => {
     });
   };
   useEffect(() => {
-  if (props.assistant) {
-    setForm({
-      login: props.assistant.login || "",
-      password: "", // không bao giờ trả password từ backend
-      firstName: props.assistant.firstName || "",
-      lastName: props.assistant.lastName || "",
-      email: props.assistant.email || "",
-      langKey: "vi",
-      authorities: ["ROLE_ASSISTANT"],
-    });
-  }
-}, [props.assistant]);
+    if (props.assistant) {
+      setForm({
+        login: props.assistant.login || "",
+        password: "", // không bao giờ trả password từ backend
+        firstName: props.assistant.firstName || "",
+        lastName: props.assistant.lastName || "",
+        email: props.assistant.email || "",
+        langKey: "vi",
+        authorities: ["ROLE_ASSISTANT"],
+      });
+    }
+  }, [props.assistant]);
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-  const url = props.assistant
-    ? `http://localhost:8080/api/vets/assistants/${props.assistant.id}`
-    : "http://localhost:8080/api/vets/assistants";
 
-  const method = props.assistant ? "PUT" : "POST";
+    const url = props.assistant
+      ? `http://localhost:8080/api/vets/assistants/${props.assistant.id}`
+      : "http://localhost:8080/api/vets/assistants";
 
-  const res = await fetch(url, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-    },
-    body: JSON.stringify(form),
-  });
+    const method = props.assistant ? "PUT" : "POST";
 
-  if (res.ok) {
-    Swal.fire({
-      title: props.assistant ? "Cập nhật thành công!" : "Thêm trợ lý thành công!",
-      icon: "success",
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+      body: JSON.stringify(form),
     });
-    props.onCreated?.();
-  } else {
-    Swal.fire({ title: "Lỗi!", icon: "error" });
-  }
-};
+
+    if (res.ok) {
+      Swal.fire({
+        title: props.assistant ? "Cập nhật thành công!" : "Thêm trợ lý thành công!",
+        icon: "success",
+      });
+      props.onCreated?.();
+    } else {
+      Swal.fire({ title: "Lỗi!", icon: "error" });
+    }
+  };
 
   return (
-    <div className="add-sup-container">
-      <h2>Thêm Trợ Lý</h2>
+    <div className="main-container">
+      <div className="add-sup-container">
+        <h2>Thêm Trợ Lý</h2>
 
-      <form onSubmit={handleSubmit} className="sup-form">
-        <input
-          type="text"
-          name="login"
-          placeholder="Tên đăng nhập"
-          value={form.login}
-          onChange={handleChange}
-          required
-        />
+        <form onSubmit={handleSubmit} className="sup-form">
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Mật khẩu"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
+          <div className="name-row">
+            <input
+              type="text"
+              name="firstName"
+              placeholder="Họ"
+              value={form.firstName}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="lastName"
+              placeholder="Tên"
+              value={form.lastName}
+              onChange={handleChange}
+            />
+          </div>
 
-        <input
-          type="text"
-          name="firstName"
-          placeholder="Họ"
-          value={form.firstName}
-          onChange={handleChange}
-          required
-        />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="login"
+            placeholder="Tên đăng nhập"
+            value={form.login}
+            onChange={handleChange}
+            required
+          />
 
-        <input
-          type="text"
-          name="lastName"
-          placeholder="Tên"
-          value={form.lastName}
-          onChange={handleChange}
-        />
+          <input
+            type="password"
+            name="password"
+            placeholder="Mật khẩu"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-
-        <button type="submit">{props.assistant ? "Cập nhật" : "Thêm"}</button>
+          <button type="submit">{props.assistant ? "Cập nhật" : "Thêm"}</button>
           <button type="button" onClick={props.onCancel}>
             Hủy
           </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
