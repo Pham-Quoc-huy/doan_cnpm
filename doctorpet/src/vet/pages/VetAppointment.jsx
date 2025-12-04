@@ -38,9 +38,7 @@ const VetAppointment = (props) => {
           appointmentId={detailId}
           onBack={() => setDetailId(null)}
           onApproved={(updated) => {
-            setAppointments((prev) =>
-              prev.map((item) => (item.id === updated.id ? updated : item))
-            );
+            setAppointments((prev) => prev.filter((i) => i.id !== updated.id));
             setDetailId(null);
           }}
         />

@@ -6,7 +6,8 @@ const VetSchedule = ({ vetId, nameVet }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("TODAY"); // Tab mặc định là hôm nay
+  const [activeTab, setActiveTab] = useState("TODAY");
+  const [selectedDate, setSelectedDate] = useState("");
   const [detailId, setDetailId] = useState(null);
   const jwt = localStorage.getItem("jwt");
   useEffect(() => {
@@ -42,6 +43,13 @@ const VetSchedule = ({ vetId, nameVet }) => {
   if (error) return <div style={{ color: "red" }}>{error}</div>;
 
   // Filter theo tab
+  function isSameDay(date1, date2) {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  }
   const today = new Date();
   const filteredAppointments = appointments.filter((appt) => {
     const apptDate = new Date(appt.timeStart);
@@ -55,6 +63,10 @@ const VetSchedule = ({ vetId, nameVet }) => {
     if (activeTab === "APPROVED") return appt.status === "APPROVED";
     if (activeTab === "REJECTED") return appt.status === "REJECTED";
     if (activeTab === "RESCHEDULED") return appt.status === "RESCHEDULED";
+    if (activeTab === "DATE" && selectedDate) {
+      const picked = new Date(selectedDate);
+      return isSameDay(apptDate, picked);
+    }
     return false;
   });
   return (
@@ -62,33 +74,54 @@ const VetSchedule = ({ vetId, nameVet }) => {
       {/* NAV / Tabs */}
       {!detailId && (
         <div>
-          <button className={`btn-tab ${activeTab === "TODAY" ? "active" : ""}`}
+          <button
+            className={`btn-tab ${activeTab === "TODAY" ? "active" : ""}`}
             onClick={() => setActiveTab("TODAY")}
           >
             Hôm nay
           </button>
-          <button className={`btn-tab ${activeTab === "APPROVED" ? "active" : ""}`}
+          <button
+            className={`btn-tab ${activeTab === "APPROVED" ? "active" : ""}`}
             onClick={() => setActiveTab("APPROVED")}
           >
             Đã duyệt
           </button>
-          <button className={`btn-tab ${activeTab === "REJECTED" ? "active" : ""}`}
+          <button
+            className={`btn-tab ${activeTab === "REJECTED" ? "active" : ""}`}
             onClick={() => setActiveTab("REJECTED")}
           >
             Từ chối
           </button>
-          <button className={`btn-tab ${activeTab === "RESCHEDULED" ? "active" : ""}`}
+          <button
+            className={`btn-tab ${activeTab === "RESCHEDULED" ? "active" : ""}`}
             onClick={() => setActiveTab("RESCHEDULED")}
           >
             Đã đổi lịch
           </button>
+          <button
+            className={`btn-tab ${activeTab === "DATE" ? "active" : ""}`}
+            onClick={() => setActiveTab("DATE")}
+          >
+            Chọn ngày
+          </button>
+          {activeTab === "DATE" && (
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              style={{
+                marginLeft: "10px",
+                padding: "5px",
+              }}
+            />
+          )}
         </div>
       )}
 
       {/* Chi tiết appointment */}
       {detailId ? (
         <DetailAppointment
-         data = {appointments}
+          data={appointments}
           appointmentId={detailId}
           onBack={() => setDetailId(null)}
           onApproved={(updated) => {

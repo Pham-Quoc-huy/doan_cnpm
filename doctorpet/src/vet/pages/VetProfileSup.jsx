@@ -7,14 +7,11 @@ const VetProfileSup = () => {
   const [assistants, setAssistants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeAssistantId, setActiveAssistantId] = useState(null);
+ const [editingAssistant, setEditingAssistant] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
 
   const jwt = localStorage.getItem("jwt");
 
-  // -------------------------------
-  // 🔥 Hàm fetch danh sách trợ lý
-  // -------------------------------
   const fetchAssistants = async () => {
     try {
       setLoading(true);
@@ -27,13 +24,10 @@ const VetProfileSup = () => {
       });
 
       if (!res.ok) throw new Error("Không thể tải danh sách trợ lý");
-
-      // 🌟 FIX: Nếu body rỗng → tránh lỗi Unexpected end of JSON input
       const text = await res.text();
       const data = text ? JSON.parse(text) : [];
 
       setAssistants(data);
-      console.log("Assistants fetched:", data);
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -42,30 +36,18 @@ const VetProfileSup = () => {
     }
   };
 
-  // 👉 useEffect chỉ chạy 1 lần để lấy toàn bộ assistants
   useEffect(() => {
     fetchAssistants();
   }, []);
 
-  // -------------------------------
-  // Mở form thêm mới
-  // -------------------------------
   const handleAddNew = () => {
-    setActiveAssistantId(null);
+    setEditingAssistant(null); 
     setShowSidebar(true);
   };
-
-  // -------------------------------
-  // Edit trợ lý
-  // -------------------------------
-  const handleEdit = (assistantId) => {
-    setActiveAssistantId(assistantId);
+  const handleEdit = (assistant) => {
+    setEditingAssistant(assistant);
     setShowSidebar(true);
   };
-
-  // -------------------------------
-  // Xóa trợ lý
-  // -------------------------------
   const handleDelete = async (assistantId) => {
     if (!window.confirm("Bạn có chắc muốn xóa trợ lý này?")) return;
 
@@ -80,22 +62,17 @@ const VetProfileSup = () => {
 
       if (!res.ok) throw new Error("Xóa thất bại");
 
-      // Cập nhật UI ngay lập tức
       setAssistants((prev) => prev.filter((a) => a.id !== assistantId));
     } catch (err) {
       alert(err.message);
     }
   };
 
-  // Tìm assistant đang edit
-  const activeAssistant = assistants.find(
-    (a) => a.id === activeAssistantId
-  );
 
   // Khi form thêm/sửa lưu thành công → reload list
   const handleSaved = () => {
     setShowSidebar(false);
-    setActiveAssistantId(null);
+    setEditingAssistant(null);
     fetchAssistants();
   };
 
@@ -118,7 +95,7 @@ const VetProfileSup = () => {
           <SupItem
             key={a.id}
             assistant={a}
-            onEdit={() => handleEdit(a.id)}
+            onEdit={handleEdit}
             onDelete={() => handleDelete(a.id)}
           />
         ))}
@@ -128,7 +105,7 @@ const VetProfileSup = () => {
       {showSidebar && (
         <div className="sidebar-form">
           <AddSup
-            assistant={activeAssistant}
+            assistant={editingAssistant}
             onCreated={handleSaved}
             onCancel={() => setShowSidebar(false)}
           />
