@@ -87,9 +87,9 @@ const SiderbarPet = (props) => {
       return;
     }
     if (imageFile) {
-    setFormData.imageUrl("image", imageFile); // đính kèm file
-  }
-    setLoading(true); 
+      setFormData.imageUrl("image", imageFile); // đính kèm file
+    }
+    setLoading(true);
     try {
       // Gửi dữ liệu đi (chỉ gửi các trường cần thiết, tránh gửi các trường có thể gây lỗi nếu rỗng)
       await props.handleSavePet(formData);
@@ -110,10 +110,10 @@ const SiderbarPet = (props) => {
   };
   const [imageFile, setImageFile] = useState(null);
   const handleImageChange = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  setImageFile(file);
-};
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+  };
 
   return (
     <div className={`pet-sidebar show`}>
@@ -134,6 +134,23 @@ const SiderbarPet = (props) => {
               required
             />
           </div>
+
+          <div className="column">
+            <label className="pet-form-label">Ngày sinh*</label>
+            <input
+              className="pet-form-input"
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+
+        </div>
+
+        <div className="row">
 
           <div className="column">
             <label className="pet-form-label">Loài</label>
@@ -158,9 +175,11 @@ const SiderbarPet = (props) => {
               required
             />
           </div>
+
         </div>
 
         <div className="row">
+
           <div className="column">
             <label className="pet-form-label">Giới tính*</label>
             <select
@@ -175,20 +194,7 @@ const SiderbarPet = (props) => {
               <option value="Cái">Cái</option>
             </select>
           </div>
-          <div className="column">
-            <label className="pet-form-label">Ngày sinh*</label>
-            <input
-              className="pet-form-input"
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
 
-        <div className="row">
           <div className="column">
             <label className="pet-form-label">Cân nặng (kg)</label>
             <input
@@ -200,6 +206,9 @@ const SiderbarPet = (props) => {
               min="0"
             />
           </div>
+
+        </div>
+        <div className="row">
           <div className="column">
             <label className="pet-form-label">Dị ứng</label>
             <input
@@ -211,6 +220,8 @@ const SiderbarPet = (props) => {
             />
           </div>
         </div>
+
+
 
         <label className="pet-form-label">Ghi chú</label>
         <textarea
