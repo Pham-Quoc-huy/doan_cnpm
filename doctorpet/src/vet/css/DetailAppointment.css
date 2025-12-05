@@ -135,6 +135,14 @@
   color: var(--muted);
   margin-top: 6px;
 }
+.btn-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
 .btn-group .approve,.btn-group .reject {
   padding: 10px 20px;
   border: none;

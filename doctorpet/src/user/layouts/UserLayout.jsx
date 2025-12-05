@@ -7,6 +7,8 @@ import Appointment from "../pages/Appointment";
 import Schedule from "../pages/Schedule";
 import Question from "../pages/Question";
 import Swal from "sweetalert2";
+import ChatBox from "../../message/ChatBox";
+
 const UserLayout = () => {
   const [active, setActive] = useState("profile");
   // State lưu thông tin user (owner)
@@ -15,6 +17,14 @@ const UserLayout = () => {
   const [error, setError] = useState(null);
   const savedUser = localStorage.getItem("user");
   const user = JSON.parse(savedUser);
+
+  // State cho notification
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
   useEffect(() => {
     const fetchOwners = async () => {
       try {
@@ -83,6 +93,100 @@ const UserLayout = () => {
 
     fetchOwner();
   }, [owners, user?.id]);
+
+  // Lấy thông tin user hiện tại
+  const getCurrentUser = () => {
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        return {
+          id: userData.id,
+          name: `${userData.firstName} ${userData.lastName}` || "Bạn",
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+    return {
+      id: null,
+      name: "Bạn",
+    };
+  };
+
+  // Lấy danh sách appointments và kiểm tra tin nhắn mới
+  useEffect(() => {
+    if (!userInfo.id) return;
+
+    const fetchNotifications = async () => {
+      try {
+        const jwt = localStorage.getItem("jwt");
+        if (!jwt) return;
+
+        // Lấy danh sách appointments
+        const appointmentsRes = await fetch(
+          "http://localhost:8080/api/appointments",
+          {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        );
+
+        if (!appointmentsRes.ok) return;
+        const appointments = await appointmentsRes.json();
+        const appointmentList = appointments.content || appointments;
+
+        // Lấy tin nhắn mới nhất cho mỗi appointment
+        const notificationPromises = appointmentList.map(async (appt) => {
+          try {
+            const messagesRes = await fetch(
+              `http://localhost:8080/api/appointments/${appt.id}/messages`,
+              {
+                headers: {
+                  Authorization: `Bearer ${jwt}`,
+                },
+              }
+            );
+
+            if (!messagesRes.ok) return null;
+            const messages = await messagesRes.json();
+            const messagesArray = Array.isArray(messages) ? messages : [];
+
+            if (messagesArray.length === 0) return null;
+
+            // Lấy tin nhắn mới nhất
+            const latestMessage = messagesArray[messagesArray.length - 1];
+            const isUnread = latestMessage.senderId !== user.id;
+
+            return {
+              appointmentId: appt.id,
+              appointment: appt,
+              latestMessage: latestMessage,
+              isUnread: isUnread,
+              timestamp: latestMessage.timestamp,
+            };
+          } catch (err) {
+            return null;
+          }
+        });
+
+        const notificationList = (await Promise.all(notificationPromises))
+          .filter((n) => n !== null)
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        setNotifications(notificationList);
+        setUnreadCount(notificationList.filter((n) => n.isUnread).length);
+      } catch (err) {
+        console.error("Lỗi khi lấy thông báo:", err);
+      }
+    };
+
+    fetchNotifications();
+    // Polling mỗi 5 giây để cập nhật thông báo
+    const interval = setInterval(fetchNotifications, 5000);
+    return () => clearInterval(interval);
+  }, [userInfo.id, user?.id]);
+
   // cập nhật người dùng
   const updateOwner = async () => {
     // 3. Lấy JWT để sử dụng trong header Authorization
@@ -144,9 +248,73 @@ const UserLayout = () => {
         {/* Sidebar */}
         <div className="sidebar">
           <div className="profile-section">
-            <div className="notification-icon">
+            <div
+              className="notification-icon"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
               <i className="ri-notification-3-line"></i>
+              {unreadCount > 0 && (
+                <span className="notification-badge">{unreadCount}</span>
+              )}
             </div>
+
+            {/* Dropdown thông báo */}
+            {showNotifications && (
+              <div className="notification-dropdown">
+                <div className="notification-header">
+                  <h4>Thông báo tin nhắn</h4>
+                  <button
+                    className="notification-close"
+                    onClick={() => setShowNotifications(false)}
+                  >
+                    <i className="ri-close-line"></i>
+                  </button>
+                </div>
+                <div className="notification-list">
+                  {notifications.length === 0 ? (
+                    <div className="notification-empty">
+                      <i className="ri-message-3-line"></i>
+                      <p>Chưa có tin nhắn nào</p>
+                    </div>
+                  ) : (
+                    notifications.map((notif) => (
+                      <div
+                        key={notif.appointmentId}
+                        className={`notification-item ${
+                          notif.isUnread ? "unread" : ""
+                        }`}
+                        onClick={() => {
+                          setSelectedAppointmentId(notif.appointmentId);
+                          setIsChatOpen(true);
+                          setIsChatMinimized(false);
+                          setShowNotifications(false);
+                        }}
+                      >
+                        <div className="notification-content">
+                          <div className="notification-title">
+                            {notif.appointment?.vet?.name || "Bác sĩ"}
+                            {notif.isUnread && (
+                              <span className="notification-dot"></span>
+                            )}
+                          </div>
+                          <div className="notification-message">
+                            {notif.latestMessage.message}
+                          </div>
+                          <div className="notification-time">
+                            {new Date(notif.timestamp).toLocaleString("vi-VN", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
 
             <img
               className="avatar"
@@ -233,6 +401,29 @@ const UserLayout = () => {
           {active === "question" && <Question ownerId={userInfo.id} />}
         </div>
       </div>
+
+      {/* ChatBox từ notification */}
+      {isChatOpen && selectedAppointmentId && (
+        <ChatBox
+          appointmentId={selectedAppointmentId}
+          currentUser={getCurrentUser()}
+          recipientName={
+            notifications.find((n) => n.appointmentId === selectedAppointmentId)
+              ?.appointment?.vet?.name || "Bác sĩ"
+          }
+          recipientAvatar={
+            notifications.find((n) => n.appointmentId === selectedAppointmentId)
+              ?.appointment?.vet?.avatar
+          }
+          isOpen={isChatOpen}
+          isMinimized={isChatMinimized}
+          onClose={() => {
+            setIsChatOpen(false);
+            setSelectedAppointmentId(null);
+          }}
+          onMinimize={() => setIsChatMinimized(!isChatMinimized)}
+        />
+      )}
     </>
   );
 };

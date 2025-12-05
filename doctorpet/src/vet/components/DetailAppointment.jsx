@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "../css/DetailAppointment.css";
 import Swal from "sweetalert2";
+import ButtonMessage from "../../message/ButtonMessage";
+import ChatBox from "../../message/ChatBox";
 
 const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
   const [appointment, setAppointment] = useState(null);
@@ -266,6 +268,99 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
   if (!appointment) return <div>Không tìm thấy lịch hẹn.</div>;
 
   const isPending = appointment.status === "PENDING";
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [lastReadMessageId, setLastReadMessageId] = useState(null);
+
+  // Lấy thông tin vet hiện tại
+  const getCurrentUser = () => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        return {
+          id: user.id,
+          name: `${user.firstName} ${user.lastName}` || "Bác sĩ",
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+    return {
+      id: null,
+      name: "Bác sĩ",
+    };
+  };
+
+  const handleMessage = () => {
+    setIsChatOpen(true);
+    setIsChatMinimized(false);
+  };
+
+  // Lấy số tin nhắn chưa đọc
+  useEffect(() => {
+    if (!appointmentId) return;
+
+    const fetchUnreadCount = async () => {
+      try {
+        const jwt = localStorage.getItem("jwt");
+        if (!jwt) return;
+
+        const res = await fetch(
+          `http://localhost:8080/api/appointments/${appointmentId}/messages`,
+          {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        );
+
+        if (!res.ok) return;
+        const messages = await res.json();
+        const messagesArray = Array.isArray(messages) ? messages : [];
+
+        // Lấy currentUser trong useEffect
+        const savedUser = localStorage.getItem("user");
+        let currentUserId = null;
+        if (savedUser) {
+          try {
+            const user = JSON.parse(savedUser);
+            currentUserId = user.id;
+          } catch (e) {
+            return;
+          }
+        }
+
+        if (!currentUserId) return;
+
+        // Nếu ChatBox đang mở, cập nhật lastReadMessageId
+        if (isChatOpen && messagesArray.length > 0) {
+          const lastMessage = messagesArray[messagesArray.length - 1];
+          setLastReadMessageId(lastMessage.id);
+          setUnreadCount(0);
+          return;
+        }
+
+        // Đếm tin nhắn chưa đọc: tin nhắn không phải của vet hiện tại
+        // và có id lớn hơn lastReadMessageId (tin nhắn mới sau lần đọc cuối)
+        const unread = messagesArray.filter((m) => {
+          if (m.senderId === currentUserId) return false;
+          if (lastReadMessageId === null) return true; // Chưa đọc lần nào
+          return m.id > lastReadMessageId; // Tin nhắn mới sau lần đọc cuối
+        }).length;
+
+        setUnreadCount(unread);
+      } catch (err) {
+        console.error("Lỗi khi lấy số tin nhắn chưa đọc:", err);
+      }
+    };
+
+    fetchUnreadCount();
+    // Polling mỗi 5 giây để cập nhật
+    const interval = setInterval(fetchUnreadCount, 5000);
+    return () => clearInterval(interval);
+  }, [appointmentId, isChatOpen, lastReadMessageId]);
 
   return (
     <div className="appointment-detail">
@@ -399,7 +494,33 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
         <button className="reject" disabled={!isPending} onClick={handleReject}>
           Từ chối
         </button>
+
+        <ButtonMessage
+          onClick={handleMessage}
+          text="Nhắn tin"
+          variant="secondary"
+          icon="ri-message-3-line"
+          unreadCount={unreadCount}
+        />
       </div>
+
+      {/* ChatBox */}
+      {isChatOpen && (
+        <ChatBox
+          appointmentId={appointmentId}
+          currentUser={getCurrentUser()}
+          recipientName={
+            appointment.owner
+              ? `${appointment.owner.firstName} ${appointment.owner.lastName}`
+              : "Chủ nuôi"
+          }
+          recipientAvatar={appointment.owner?.avatar}
+          isOpen={isChatOpen}
+          isMinimized={isChatMinimized}
+          onClose={() => setIsChatOpen(false)}
+          onMinimize={() => setIsChatMinimized(!isChatMinimized)}
+        />
+      )}
     </div>
   );
 };
