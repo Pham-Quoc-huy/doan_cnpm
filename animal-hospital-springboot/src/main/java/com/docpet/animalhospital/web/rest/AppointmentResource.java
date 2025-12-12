@@ -138,41 +138,78 @@ public class AppointmentResource {
         
         List<AppointmentDTO> appointments;
         
-        // Kiểm tra xem user là owner hay vet
+        // Kiểm tra xem user là owner, vet hay assistant
         boolean isOwner = ownerRepository.findByUser_Login(currentUserLogin).isPresent();
         boolean isVet = SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.DOCTOR);
+        boolean isAssistant = SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ASSISTANT);
         
-        if (isOwner && isVet) {
-            // User có cả owner và vet profile - trả về appointments của cả hai
+        LOG.debug("User roles - isOwner: {}, isVet: {}, isAssistant: {}", isOwner, isVet, isAssistant);
+        
+        // Collect appointments từ các role khác nhau
+        java.util.Set<Long> appointmentIds = new java.util.HashSet<>();
+        List<AppointmentDTO> allAppointments = new java.util.ArrayList<>();
+        
+        // Lấy appointments của owner (nếu có)
+        if (isOwner) {
             List<AppointmentDTO> ownerAppointments = appointmentService.findAllForCurrentOwner(currentUserLogin);
-            List<AppointmentDTO> vetAppointments = appointmentService.findAllForCurrentVet(currentUserLogin);
-            
-            // Merge và loại bỏ duplicate
-            java.util.Set<Long> appointmentIds = new java.util.HashSet<>();
-            List<AppointmentDTO> allAppointments = new java.util.ArrayList<>();
-            
+            LOG.debug("Found {} owner appointments", ownerAppointments.size());
             for (AppointmentDTO apt : ownerAppointments) {
                 if (appointmentIds.add(apt.getId())) {
                     allAppointments.add(apt);
                 }
             }
+        }
+        
+        // Lấy appointments của vet (nếu có)
+        if (isVet) {
+            List<AppointmentDTO> vetAppointments = appointmentService.findAllForCurrentVet(currentUserLogin);
+            LOG.debug("Found {} vet appointments", vetAppointments.size());
             for (AppointmentDTO apt : vetAppointments) {
                 if (appointmentIds.add(apt.getId())) {
                     allAppointments.add(apt);
                 }
             }
-            
-            appointments = allAppointments;
-        } else if (isOwner) {
-            // User là owner
-            appointments = appointmentService.findAllForCurrentOwner(currentUserLogin);
-        } else if (isVet) {
-            // User là vet
-            appointments = appointmentService.findAllForCurrentVet(currentUserLogin);
-        } else {
-            // User không phải owner cũng không phải vet
-            appointments = java.util.Collections.emptyList();
         }
+        
+        // Lấy appointments của assistant (nếu có)
+        if (isAssistant) {
+            try {
+                Optional<Assistant> assistantOpt = assistantRepository.findByUser_Login(currentUserLogin);
+                if (assistantOpt.isPresent()) {
+                    Assistant assistant = assistantOpt.get();
+                    Long assistantId = assistant.getId();
+                    LOG.debug("Found assistant with id: {}", assistantId);
+                    
+                    // Lấy appointments đã được phân công từ bảng appointment_assistant
+                    List<AppointmentAssistant> appointmentAssistants = appointmentAssistantRepository
+                        .findByAssistantIdWithRelations(assistantId);
+                    
+                    LOG.debug("Found {} appointment_assistant records for assistant id: {}", 
+                        appointmentAssistants.size(), assistantId);
+                    
+                    // Convert sang AppointmentDTO
+                    for (AppointmentAssistant aa : appointmentAssistants) {
+                        try {
+                            Long appointmentId = aa.getAppointment().getId();
+                            Optional<AppointmentDTO> appointmentOpt = appointmentService.findOne(appointmentId);
+                            if (appointmentOpt.isPresent() && appointmentIds.add(appointmentId)) {
+                                allAppointments.add(appointmentOpt.get());
+                            }
+                        } catch (Exception e) {
+                            LOG.warn("Error converting AppointmentAssistant to AppointmentDTO for appointment id: {}", 
+                                aa.getAppointment() != null ? aa.getAppointment().getId() : "null", e);
+                        }
+                    }
+                } else {
+                    LOG.debug("User has ASSISTANT role but no assistant record found");
+                }
+            } catch (Exception e) {
+                LOG.error("Error getting assistant appointments for user: {}", currentUserLogin, e);
+            }
+        }
+        
+        appointments = allAppointments;
+        LOG.debug("Returning {} total appointments (merged from all roles)", appointments.size());
         
         return ResponseEntity.ok().body(appointments);
     }

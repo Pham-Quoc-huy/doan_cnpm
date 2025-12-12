@@ -1,14 +1,18 @@
 package com.docpet.animalhospital.web.rest;
 
 import com.docpet.animalhospital.domain.Assistant;
+import com.docpet.animalhospital.domain.AppointmentAssistant;
 import com.docpet.animalhospital.domain.User;
 import com.docpet.animalhospital.repository.AssistantRepository;
+import com.docpet.animalhospital.repository.AppointmentAssistantRepository;
 import com.docpet.animalhospital.repository.UserRepository;
 import com.docpet.animalhospital.security.AuthoritiesConstants;
 import com.docpet.animalhospital.service.AssistantService;
+import com.docpet.animalhospital.service.AppointmentService;
 import com.docpet.animalhospital.service.MailService;
 import com.docpet.animalhospital.service.UserService;
 import com.docpet.animalhospital.service.dto.AdminUserDTO;
+import com.docpet.animalhospital.service.dto.AppointmentDTO;
 import com.docpet.animalhospital.service.dto.AssistantWithUserDTO;
 import com.docpet.animalhospital.web.rest.errors.BadRequestAlertException;
 import com.docpet.animalhospital.web.rest.errors.EmailAlreadyUsedException;
@@ -41,19 +45,25 @@ public class VetAssistantController {
     private final AssistantRepository assistantRepository;
     private final AssistantService assistantService;
     private final MailService mailService;
+    private final AppointmentAssistantRepository appointmentAssistantRepository;
+    private final AppointmentService appointmentService;
 
     public VetAssistantController(
         UserService userService,
         UserRepository userRepository,
         AssistantRepository assistantRepository,
         AssistantService assistantService,
-        MailService mailService
+        MailService mailService,
+        AppointmentAssistantRepository appointmentAssistantRepository,
+        AppointmentService appointmentService
     ) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.assistantRepository = assistantRepository;
         this.assistantService = assistantService;
         this.mailService = mailService;
+        this.appointmentAssistantRepository = appointmentAssistantRepository;
+        this.appointmentService = appointmentService;
     }
 
     @PostMapping("/assistants")
@@ -169,6 +179,80 @@ public class VetAssistantController {
         }
         
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Lấy danh sách appointments đã được phân công cho một assistant cụ thể
+     * GET /api/vets/assistants/{assistantId}/appointments
+     * 
+     * Xử lý các trường hợp:
+     * - assistantId không tồn tại → 404 Not Found
+     * - assistantId hợp lệ nhưng không có appointments → 200 OK với mảng rỗng []
+     * - assistantId null hoặc không hợp lệ → 400 Bad Request
+     * 
+     * @param assistantId ID của assistant (assistant.id, không phải userId)
+     * @return Danh sách AppointmentDTO (có thể rỗng nếu assistant chưa có appointments)
+     */
+    @GetMapping("/assistants/{assistantId}/appointments")
+    public ResponseEntity<List<AppointmentDTO>> getAssistantAppointments(@PathVariable Long assistantId) {
+        LOG.debug("REST request to get appointments for assistant id: {}", assistantId);
+        
+        // Validate assistantId
+        if (assistantId == null) {
+            LOG.warn("Invalid request: assistantId is null");
+            throw new BadRequestAlertException("Assistant ID không được để trống", ENTITY_NAME, "invalidid");
+        }
+        
+        if (assistantId <= 0) {
+            LOG.warn("Invalid request: assistantId is invalid: {}", assistantId);
+            throw new BadRequestAlertException("Assistant ID không hợp lệ", ENTITY_NAME, "invalidid");
+        }
+        
+        // Kiểm tra assistant có tồn tại không
+        Optional<Assistant> assistantOpt = assistantRepository.findByIdWithUser(assistantId);
+        if (assistantOpt.isEmpty()) {
+            LOG.warn("Assistant not found with id: {}", assistantId);
+            throw new BadRequestAlertException(
+                "Assistant không tồn tại với ID: " + assistantId, 
+                ENTITY_NAME, 
+                "notfound"
+            );
+        }
+        
+        Assistant assistant = assistantOpt.get();
+        LOG.debug("Found assistant: id={}, userId={}", assistant.getId(), 
+            assistant.getUser() != null ? assistant.getUser().getId() : "null");
+        
+        // Lấy appointments đã được phân công từ bảng appointment_assistant
+        List<AppointmentAssistant> appointmentAssistants = appointmentAssistantRepository
+            .findByAssistantIdWithRelations(assistantId);
+        
+        LOG.debug("Found {} appointment_assistant records for assistant id: {}", 
+            appointmentAssistants.size(), assistantId);
+        
+        // Convert sang AppointmentDTO
+        List<AppointmentDTO> appointments = appointmentAssistants.stream()
+            .map(aa -> {
+                try {
+                    Long appointmentId = aa.getAppointment().getId();
+                    Optional<AppointmentDTO> appointmentOpt = appointmentService.findOne(appointmentId);
+                    if (appointmentOpt.isEmpty()) {
+                        LOG.warn("Appointment not found with id: {} (referenced by appointment_assistant)", appointmentId);
+                        return null;
+                    }
+                    return appointmentOpt.get();
+                } catch (Exception e) {
+                    LOG.error("Error converting AppointmentAssistant to AppointmentDTO", e);
+                    return null;
+                }
+            })
+            .filter(appointment -> appointment != null)
+            .collect(Collectors.toList());
+        
+        LOG.debug("Returning {} appointment DTOs for assistant id: {}", appointments.size(), assistantId);
+        
+        // Trả về danh sách (có thể rỗng nếu assistant chưa có appointments)
+        return ResponseEntity.ok().body(appointments);
     }
 
     private static boolean isPasswordLengthInvalid(String password) {

@@ -9,6 +9,9 @@ const VetProfileSup = () => {
   const [error, setError] = useState("");
   const [editingAssistant, setEditingAssistant] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [selectedAssistantId, setSelectedAssistantId] = useState(null);
+  const [assistantAppointments, setAssistantAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
 
   const jwt = localStorage.getItem("jwt");
 
@@ -68,6 +71,36 @@ const VetProfileSup = () => {
     }
   };
 
+  // Lấy lịch của assistant cụ thể
+  const handleViewSchedule = async (assistantId) => {
+    try {
+      setLoadingAppointments(true);
+      setSelectedAssistantId(assistantId);
+
+      const res = await fetch(
+        `http://localhost:8080/api/vets/assistants/${assistantId}/appointments`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Không thể tải lịch của trợ lý");
+
+      const data = await res.json();
+      setAssistantAppointments(data);
+      console.log("Lịch của assistant:", data);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+      setAssistantAppointments([]);
+    } finally {
+      setLoadingAppointments(false);
+    }
+  };
+
 
   // Khi form thêm/sửa lưu thành công → reload list
   const handleSaved = () => {
@@ -97,22 +130,55 @@ const VetProfileSup = () => {
             assistant={a}
             onEdit={handleEdit}
             onDelete={() => handleDelete(a.id)}
+            onViewSchedule={handleViewSchedule}
           />
         ))}
       </div>
 
       {/* Form thêm / sửa */}
       {showSidebar && (
-
         <AddSup
           assistant={editingAssistant}
           onCreated={handleSaved}
           onCancel={() => setShowSidebar(false)}
         />
+      )}
 
-      )
-      }
-    </div >
+      {/* Hiển thị lịch của assistant */}
+      {selectedAssistantId && (
+        <div className="assistant-schedule-section" style={{ marginTop: "20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+            <h3>Lịch của trợ lý</h3>
+            <button onClick={() => {
+              setSelectedAssistantId(null);
+              setAssistantAppointments([]);
+            }}>Đóng</button>
+          </div>
+          
+          {loadingAppointments ? (
+            <p>Đang tải lịch...</p>
+          ) : assistantAppointments.length === 0 ? (
+            <p>Không có lịch hẹn nào.</p>
+          ) : (
+            <div className="appointments-list">
+              {assistantAppointments.map((appt) => (
+                <div key={appt.id} style={{ 
+                  border: "1px solid #ddd", 
+                  padding: "10px", 
+                  marginBottom: "10px",
+                  borderRadius: "5px"
+                }}>
+                  <p><strong>Thú cưng:</strong> {appt.pet?.name}</p>
+                  <p><strong>Thời gian:</strong> {new Date(appt.timeStart).toLocaleString("vi-VN")}</p>
+                  <p><strong>Trạng thái:</strong> {appt.status}</p>
+                  <p><strong>Loại:</strong> {appt.appointmentType}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
