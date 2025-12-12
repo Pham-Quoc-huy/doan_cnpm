@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   formatDateTime,
   getBadgeClass,
+  getLocation,
 } from "../components/appointmentFormatter";
 const AppointmentList = () => {
   const navigate = useNavigate();
@@ -68,9 +69,10 @@ const AppointmentList = () => {
                   </div>
                 </div>
                 <div
-                  className={`appointmentType ${getBadgeClass(
-                    app.appointmentType
-                  )}`}
+                  className={`appointmentType ${app.appointmentType === "EMERGENCY"
+                    ? "emergency"
+                    : ""
+                    }`}
                 >
                   {app.appointmentType === "EMERGENCY"
                     ? "KHẨN CẤP"
@@ -89,7 +91,7 @@ const AppointmentList = () => {
                   </span>
                 </div>
 
-                {/* <div className="info-item">
+                <div className="info-item">
                   <i
                     className={`icon ${app.locationType === "AT_HOME"
                       ? "ri-home-4-line"
@@ -101,28 +103,42 @@ const AppointmentList = () => {
                   <span>
                     <strong>Hình thức:</strong> {getLocation(app.locationType)}
                   </span>
-                </div> */}
-
-                {/* <div className="type">
-                  <i className="ri-stethoscope-line" style={{ color: "#0ea5e9" }}></i>
-                  <strong> Loại khám: </strong> {app.type}
-                </div> */}
-                <div className="info-item">
-                  <i className="ri-time-line icon-info text-orange-600"></i>
-                  <div>
-                    <strong>Trạng thái:</strong> {app.status}
-                  </div>
                 </div>
+
+                <div className="type">
+                  <i className="ri-stethoscope-line" style={{ color: "#0ea5e9" }}></i>
+                  <strong> Loại khám: </strong> {""}
+                  {app.type === "CHECKUP"
+                    ? "Kiểm tra sức khỏe"
+                    : app.type === "VACCINE"
+                      ? "Tiêm chủng"
+                      : "Phẫu thuật"}
+                </div>
+
               </div>
 
-              {/* <div className="info-grid">
+              <div className="info-grid">
                 <div className="info-item">
                   <i className="ri-file-text-line icon" style={{ color: "#6b7280" }}></i>
                   <span>
                     <strong>Ghi chú:</strong> {app.notes || "Không có"}
                   </span>
                 </div>
-              </div> */}
+                <div className="info-item">
+                  <i className="ri-time-line icon-info text-orange-600"></i>
+                  <div>
+                    <strong>Trạng thái:</strong>{" "}
+                    {app.status === "PENDING"
+                      ? "Chờ duyệt"
+                      : app.status === "APPROVED"
+                        ? "Đã duyệt"
+                        : app.status === "REJECTED"
+                          ? "Từ chối"
+                          : "Đổi lịch"}
+                  </div>
+                </div>
+                <div className="info-item"></div>
+              </div>
 
               <div className="detail-button-container">
                 <button

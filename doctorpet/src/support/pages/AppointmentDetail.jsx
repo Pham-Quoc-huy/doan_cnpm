@@ -3,7 +3,7 @@ import "remixicon/fonts/remixicon.css";
 import "../css/AppointmentDetail.css";
 import { useParams } from "react-router-dom";
 import { formatDateTime, getLocation, getBadgeClass } from '../components/appointmentFormatter';
-import ChatBox from "../components/Chatbox.jsx";
+
 
 const AppointmentDetail = () => {
     const { id } = useParams();
@@ -37,30 +37,30 @@ const AppointmentDetail = () => {
         fetchAppointment();
     }, [id]);
 
-    // const formatDateTime = (timeStr) => {
-    //     if (!timeStr) return "";
-    //     const d = new Date(timeStr);
-    //     const pad = (n) => n.toString().padStart(2, "0");
-    //     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} - ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    // };
+    const formatDateTime = (timeStr) => {
+        if (!timeStr) return "";
+        const d = new Date(timeStr);
+        const pad = (n) => n.toString().padStart(2, "0");
+        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} - ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
 
-    // const getBadgeClass = (type) => {
-    //     const map = {
-    //         EMERGENCY: "badge-emergency",
-    //         NORMAL: "badge-normal",
-    //     };
-    //     return map[type] || "badge";
-    // };
+    const getBadgeClass = (type) => {
+        const map = {
+            EMERGENCY: "badge-emergency",
+            NORMAL: "badge-normal",
+        };
+        return map[type] || "badge";
+    };
 
-    // const getLocation = (loc) => {
-    //     return loc === "AT_HOME"
-    //         ? "Tại nhà"
-    //         : loc === "AT_CLINIC"
-    //             ? "Tại phòng khám"
-    //             : loc === "ONLINE"
-    //                 ? "Tư vấn online"
-    //                 : loc;
-    // };
+    const getLocation = (loc) => {
+        return loc === "AT_HOME"
+            ? "Tại nhà"
+            : loc === "AT_CLINIC"
+                ? "Tại phòng khám"
+                : loc === "ONLINE"
+                    ? "Tư vấn online"
+                    : loc;
+    };
 
     if (loading) return <p>Đang tải dữ liệu...</p>;
     if (!appointment) return <p>Không tìm thấy lịch hẹn.</p>;
@@ -115,20 +115,36 @@ const AppointmentDetail = () => {
                                 <p>{getLocation(appointment.locationType)}</p>
                             </div>
                         </div>
-                        <div className="type">
+
+                    </div>
+                    <div className="detail-info-grid">
+                        <div className="info-row">
                             <i className="ri-stethoscope-line" style={{ color: "#0ea5e9" }}></i>
-                            <strong> Loại khám: </strong> {appointment.type}
+                            <div>
+                                <strong> Loại khám: </strong> {" "}
+                                {appointment.type === "CHECKUP"
+                                    ? "Kiểm tra sức khỏe"
+                                    : appointment.type === "VACCINE"
+                                        ? "Tiêm chủng"
+                                        : "Phẫu thuật"}
+                            </div>
                         </div>
 
-                        {/* <div className="info-row">
+                        <div className="info-row">
                             <i className="ri-time-line icon-info text-orange-600"></i>
                             <div>
-                                <strong>Trạng thái</strong>
+                                <strong>Trạng thái</strong>{""}
                                 <p className="text-orange-700 font-medium">
-                                    {appointment.status}
+                                    {appointment.status === "PENDING"
+                                        ? "Chờ duyệt"
+                                        : appointment.status === "APPROVED"
+                                            ? "Đã duyệt"
+                                            : appointment.status === "REJECTED"
+                                                ? "Từ chối"
+                                                : "Đổi lịch"}
                                 </p>
                             </div>
-                        </div> */}
+                        </div>
                     </div>
 
                     {/* Notes */}
@@ -147,17 +163,10 @@ const AppointmentDetail = () => {
                             <span className="price-label">Tổng chi phí</span>
                             <span className="price-value">Chưa xác định</span>
                         </div>
-                        <div className="action-buttons">
-                            <button className="btn-edit">
-                                <i className="ri-edit-line"></i> Chỉnh sửa
-                            </button>
-                            <button className="btn-cancel">
-                                <i className="ri-close-line"></i> Hủy hẹn
-                            </button>
-                        </div>
+
                     </div>
                 </div>
-                <ChatBox appointmentId={id} currentUser={currentUser} />
+
             </div>
         </div>
     );

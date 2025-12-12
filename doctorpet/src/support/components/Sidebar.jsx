@@ -29,6 +29,8 @@ const Sidebar = () => {
                 phone: "", // sẽ fetch sau từ API
                 id: userId, // set ownerId = id
                 user_id: userId,
+                email: `${user.email}`,
+                authority: `${user.authorities}`,
             });
         }
     }, []);
@@ -39,8 +41,8 @@ const Sidebar = () => {
                 <div className="profile-section">
                     <img className="avatar" src={user.avatar} alt="avatar" />
                     <input type="text" value={user.name} readOnly className="info-input" />
-                    <input type="text" value={user.name} readOnly className="info-input" />
-                    <input type="text" value={user.userId} readOnly className="info-input" />
+                    <input type="text" value={user.email} readOnly className="info-input" />
+                    <input type="text" value={user.authority} readOnly className="info-input" />
                 </div>
 
                 <div className="menu-section">
