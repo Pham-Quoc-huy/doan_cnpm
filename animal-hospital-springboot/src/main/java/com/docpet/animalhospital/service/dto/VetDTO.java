@@ -9,6 +9,9 @@ public class VetDTO implements Serializable {
     private String licenseNo;
     private String specialization;
     private Long userId;
+    private String firstName;
+    private String lastName;
+    private String fullName; // firstName + lastName
 
     public Long getId() {
         return id;
@@ -40,6 +43,39 @@ public class VetDTO implements Serializable {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getFullName() {
+        if (fullName != null && !fullName.trim().isEmpty()) {
+            return fullName;
+        }
+        // Tự động tạo fullName từ firstName và lastName
+        if (firstName != null || lastName != null) {
+            String first = firstName != null ? firstName.trim() : "";
+            String last = lastName != null ? lastName.trim() : "";
+            return (first + " " + last).trim();
+        }
+        return null;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     @Override
