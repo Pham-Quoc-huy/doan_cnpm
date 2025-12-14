@@ -39,10 +39,11 @@ const Sidebar = () => {
         <div className="dashboard-containe">
             <div className="sidebar">
                 <div className="profile-section">
-                    <img className="avatar" src={user.avatar} alt="avatar" />
+                    <img className="avatar" src="../public/assets/doc3.jpg"
+              alt="avatar"/>
                     <input type="text" value={user.name} readOnly className="info-input" />
                     <input type="text" value={user.email} readOnly className="info-input" />
-                    <input type="text" value={user.authority} readOnly className="info-input" />
+                    <input type="text" value=" Trợ lý "readOnly className="info-input" />
                 </div>
 
                 <div className="menu-section">
