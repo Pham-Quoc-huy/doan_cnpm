@@ -99,6 +99,7 @@ const UserLayout = () => {
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser);
+        console.log("Current User Data:", userData);
         return {
           id: userData.id,
           name: `${userData.firstName} ${userData.lastName}` || "Bạn",
@@ -384,46 +385,40 @@ const UserLayout = () => {
             >
               Lịch đã đặt
             </button>
-            <button
-              className={`menu-btn ${active === "question" ? "active" : ""}`}
-              onClick={() => setActive("question")}
-            >
-              Đặt câu hỏi
-            </button>
           </div>
         </div>
 
         {/* Main content */}
         <div className="main-content">
+          {isChatOpen && selectedAppointmentId && (
+            <ChatBox
+              appointmentId={selectedAppointmentId}
+              currentUser={getCurrentUser()}
+              recipientName={
+                notifications.find(
+                  (n) => n.appointmentId === selectedAppointmentId
+                )?.appointment?.vet?.name || "Bác sĩ"
+              }
+              recipientAvatar={
+                notifications.find(
+                  (n) => n.appointmentId === selectedAppointmentId
+                )?.appointment?.vet?.avatar
+              }
+              isOpen={isChatOpen}
+              isMinimized={isChatMinimized}
+              onClose={() => {
+                setIsChatOpen(false);
+                setSelectedAppointmentId(null);
+              }}
+              onMinimize={() => setIsChatMinimized(!isChatMinimized)}
+            />
+          )}
           {active === "profile" && <ProfilePet ownerId={userInfo.id} />}
           {active === "appointment" && <Appointment ownerId={userInfo.id} />}
           {active === "schedule" && <Schedule ownerId={userInfo.id} />}
           {active === "question" && <Question ownerId={userInfo.id} />}
         </div>
       </div>
-
-      {/* ChatBox từ notification */}
-      {isChatOpen && selectedAppointmentId && (
-        <ChatBox
-          appointmentId={selectedAppointmentId}
-          currentUser={getCurrentUser()}
-          recipientName={
-            notifications.find((n) => n.appointmentId === selectedAppointmentId)
-              ?.appointment?.vet?.name || "Bác sĩ"
-          }
-          recipientAvatar={
-            notifications.find((n) => n.appointmentId === selectedAppointmentId)
-              ?.appointment?.vet?.avatar
-          }
-          isOpen={isChatOpen}
-          isMinimized={isChatMinimized}
-          onClose={() => {
-            setIsChatOpen(false);
-            setSelectedAppointmentId(null);
-          }}
-          onMinimize={() => setIsChatMinimized(!isChatMinimized)}
-        />
-      )}
     </>
   );
 };

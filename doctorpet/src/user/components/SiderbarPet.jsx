@@ -231,9 +231,6 @@ const SiderbarPet = (props) => {
           onChange={handleChange}
         ></textarea>
 
-        <label className="pet-form-label">Chọn ảnh</label>
-        <input type="file" accept="image/*" onChange={handleImageChange} />
-
         <div className="sb-footer">
           <button className="save-btn" type="submit" disabled={loading}>
             {loading ? "Đang lưu..." : "Lưu"}

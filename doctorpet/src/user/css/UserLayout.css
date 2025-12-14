@@ -60,7 +60,6 @@ body {
 .notification-dropdown {
   position: absolute;
   top: 50px;
-  right: 0;
   width: 350px;
   max-height: 500px;
   background: white;
