@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import AddSup from "../components/AddSup";
 import SupItem from "../components/SupItem";
 import "../css/VetProfileSup.css";
-
+import Swal from "sweetalert2";
 const VetProfileSup = () => {
   const [assistants, setAssistants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,25 +51,64 @@ const VetProfileSup = () => {
     setEditingAssistant(assistant);
     setShowSidebar(true);
   };
-  const handleDelete = async (assistantId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa trợ lý này?")) return;
 
-    try {
-      const res = await fetch(
-        `http://localhost:8080/api/vets/assistants/${assistantId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${jwt}` },
-        }
-      );
+const handleDelete = async (assistantId) => {
+  const result = await Swal.fire({
+    title: "Xác nhận xóa",
+    text: "Bạn có chắc muốn xóa trợ lý này?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Xóa",
+    cancelButtonText: "Hủy",
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+  });
 
-      if (!res.ok) throw new Error("Xóa thất bại");
+  // ❌ Người dùng bấm Hủy
+  if (!result.isConfirmed) return;
 
-      setAssistants((prev) => prev.filter((a) => a.id !== assistantId));
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+  try {
+    // ⏳ Hiện loading
+    Swal.fire({
+      title: "Đang xóa...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    const res = await fetch(
+      `http://localhost:8080/api/vets/assistants/${assistantId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      }
+    );
+
+    if (!res.ok) throw new Error("Xóa thất bại");
+
+    // ✅ Cập nhật state
+    setAssistants((prev) => prev.filter((a) => a.id !== assistantId));
+
+    // 🎉 Thành công
+    Swal.fire({
+      icon: "success",
+      title: "Đã xóa!",
+      text: "Trợ lý đã được xóa thành công.",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Lỗi",
+      text: err.message || "Có lỗi xảy ra",
+    });
+  }
+};
+
 
   // Lấy lịch của assistant cụ thể
   const handleViewSchedule = async (assistantId) => {
