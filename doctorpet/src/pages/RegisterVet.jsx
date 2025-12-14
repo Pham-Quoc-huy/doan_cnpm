@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../css/Register.css";
+import Swal from "sweetalert2";
 
 const RegisterVet = () => {
   const [formData, setFormData] = useState({
@@ -12,8 +13,6 @@ const RegisterVet = () => {
     licenseNumber: "",
     specialization: "",
   });
-
-  const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
     setFormData({
@@ -34,7 +33,12 @@ const RegisterVet = () => {
       });
 
       if (res.status === 201) {
-        setMessage("Đăng ký bác sĩ thành công!");
+        Swal.fire({
+          icon: "success",
+          title: "Thành công!",
+          text: "Đăng ký bác sĩ thành công!",
+          confirmButtonText: "OK",
+        });
         setFormData({
           login: "",
           password: "",
@@ -50,12 +54,24 @@ const RegisterVet = () => {
         try {
           const data = await res.json();
           if (data.message) errMsg = data.message;
-        } catch {errMsg}
-        setMessage(errMsg);
+        } catch {
+          errMsg = "Đăng ký thất bại — kiểm tra dữ liệu đầu vào.";
+        }
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi!",
+          text: errMsg,
+          confirmButtonText: "OK",
+        });
       }
     } catch (error) {
       console.error(error);
-      setMessage("Lỗi kết nối đến server!");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi!",
+        text: "Lỗi kết nối đến server!",
+        confirmButtonText: "OK",
+      });
     }
   };
 
@@ -146,8 +162,6 @@ const RegisterVet = () => {
           <button type="submit" className="btn-register">
             Đăng Ký
           </button>
-
-          {message && <p style={{ marginTop: "10px", color: "red" }}>{message}</p>}
 
           <p className="login-link">
             Đã có tài khoản? <a href="/login">Đăng nhập</a>

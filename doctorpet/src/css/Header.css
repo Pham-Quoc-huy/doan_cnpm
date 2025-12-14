@@ -48,3 +48,11 @@ button:hover {
 .header-btn-register:hover {
   background-color: #1e7e34;
 }
+
+.header-btn-vet {
+  background-color: #ff6b35; /* màu cam cho nút Đăng ký Bác sĩ */
+}
+
+.header-btn-vet:hover {
+  background-color: #e55a2b;
+}

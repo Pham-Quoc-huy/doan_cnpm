@@ -46,6 +46,9 @@ const Header = () => {
             <Link to="/register">
               <button className="header-btn-register">Đăng Ký</button>
             </Link>
+            <Link to="/register-vet/">
+              <button className="header-btn-vet">Đăng Ký Bác Sĩ</button>
+            </Link>
           </>
         ) : (
           <button
