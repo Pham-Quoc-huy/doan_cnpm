@@ -104,7 +104,8 @@ const ScheduleItem = (props) => {
         <div className="appointment-card">
           <div className="card-header">
             <div className="pet-info">
-              <div className="pet-avatar">{props.pet.name}</div>
+              <img className="pet-avatar" src="../public/assets/meme.jpg"
+              alt="avatar"></img>
               <div>
                 <h3 className="pet-name">{props.pet.name}</h3>
                 <p className="pet-vet">với B.sĩ: {props.nameVet}</p>

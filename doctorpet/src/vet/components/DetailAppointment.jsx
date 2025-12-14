@@ -487,26 +487,32 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
       </div>
       {/* Buttons */}
       <div className="btn-group">
-        <button
-          className="approve"
-          disabled={!isPending}
-          onClick={handleApprove}
-        >
-          Duyệt lịch
-        </button>
+  {isPending && (
+    <div className="approve-reject-group">
+      <button
+        className="approve"
+        onClick={handleApprove}
+      >
+        Duyệt lịch
+      </button>
 
-        <button className="reject" disabled={!isPending} onClick={handleReject}>
-          Từ chối
-        </button>
+      <button
+        className="reject"
+        onClick={handleReject}
+      >
+        Từ chối
+      </button>
+    </div>
+  )}
 
-        <ButtonMessage
-          onClick={handleMessage}
-          text="Nhắn tin"
-          variant="secondary"
-          icon="ri-message-3-line"
-          unreadCount={unreadCount}
-        />
-      </div>
+  <ButtonMessage
+    onClick={handleMessage}
+    text="Nhắn tin"
+    variant="secondary"
+    icon="ri-message-3-line"
+    unreadCount={unreadCount}
+  />
+</div>
 
       {/* ChatBox */}
       {isChatOpen && (
