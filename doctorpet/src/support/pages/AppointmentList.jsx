@@ -69,10 +69,9 @@ const AppointmentList = () => {
                   </div>
                 </div>
                 <div
-                  className={`appointmentType ${app.appointmentType === "EMERGENCY"
-                    ? "emergency"
-                    : ""
-                    }`}
+                  className={`appointmentType ${
+                    app.appointmentType === "EMERGENCY" ? "emergency" : ""
+                  }`}
                 >
                   {app.appointmentType === "EMERGENCY"
                     ? "KHẨN CẤP"
@@ -93,12 +92,13 @@ const AppointmentList = () => {
 
                 <div className="info-item">
                   <i
-                    className={`icon ${app.locationType === "AT_HOME"
-                      ? "ri-home-4-line"
-                      : app.locationType === "AT_CLINIC"
+                    className={`icon ${
+                      app.locationType === "AT_HOME"
+                        ? "ri-home-4-line"
+                        : app.locationType === "AT_CLINIC"
                         ? "ri-hospital-line"
                         : "ri-video-chat-line"
-                      }`}
+                    }`}
                   ></i>
                   <span>
                     <strong>Hình thức:</strong> {getLocation(app.locationType)}
@@ -106,20 +106,25 @@ const AppointmentList = () => {
                 </div>
 
                 <div className="type">
-                  <i className="ri-stethoscope-line" style={{ color: "#0ea5e9" }}></i>
+                  <i
+                    className="ri-stethoscope-line"
+                    style={{ color: "#0ea5e9" }}
+                  ></i>
                   <strong> Loại khám: </strong> {""}
                   {app.type === "CHECKUP"
                     ? "Kiểm tra sức khỏe"
                     : app.type === "VACCINE"
-                      ? "Tiêm chủng"
-                      : "Phẫu thuật"}
+                    ? "Tiêm chủng"
+                    : "Phẫu thuật"}
                 </div>
-
               </div>
 
               <div className="info-grid">
                 <div className="info-item">
-                  <i className="ri-file-text-line icon" style={{ color: "#6b7280" }}></i>
+                  <i
+                    className="ri-file-text-line icon"
+                    style={{ color: "#6b7280" }}
+                  ></i>
                   <span>
                     <strong>Ghi chú:</strong> {app.notes || "Không có"}
                   </span>
@@ -131,10 +136,10 @@ const AppointmentList = () => {
                     {app.status === "PENDING"
                       ? "Chờ duyệt"
                       : app.status === "APPROVED"
-                        ? "Đã duyệt"
-                        : app.status === "REJECTED"
-                          ? "Từ chối"
-                          : "Đổi lịch"}
+                      ? "Đã duyệt"
+                      : app.status === "REJECTED"
+                      ? "Từ chối"
+                      : "Đổi lịch"}
                   </div>
                 </div>
                 <div className="info-item"></div>

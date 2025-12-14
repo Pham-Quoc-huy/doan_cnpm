@@ -42,64 +42,65 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
     fetchAppointment();
   }, [appointmentId, vetToken]);
 
-  // Lấy số tin nhắn chưa đọc
-  useEffect(() => {
+  // Hàm lấy số tin nhắn chưa đọc
+  const fetchUnreadCount = async () => {
     if (!appointmentId) return;
 
-    const fetchUnreadCount = async () => {
-      try {
-        const jwt = localStorage.getItem("jwt");
-        if (!jwt) return;
+    try {
+      const jwt = localStorage.getItem("jwt");
+      if (!jwt) return;
 
-        const res = await fetch(
-          `http://localhost:8080/api/appointments/${appointmentId}/messages`,
-          {
-            headers: {
-              Authorization: `Bearer ${jwt}`,
-            },
-          }
-        );
-
-        if (!res.ok) return;
-        const messages = await res.json();
-        const messagesArray = Array.isArray(messages) ? messages : [];
-
-        // Lấy currentUser trong useEffect
-        const savedUser = localStorage.getItem("user");
-        let currentUserId = null;
-        if (savedUser) {
-          try {
-            const user = JSON.parse(savedUser);
-            currentUserId = user.id;
-          } catch {
-            return;
-          }
+      const res = await fetch(
+        `http://localhost:8080/api/appointments/${appointmentId}/messages`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
         }
+      );
 
-        if (!currentUserId) return;
+      if (!res.ok) return;
+      const messages = await res.json();
+      const messagesArray = Array.isArray(messages) ? messages : [];
 
-        // Nếu ChatBox đang mở, cập nhật lastReadMessageId
-        if (isChatOpen && messagesArray.length > 0) {
-          const lastMessage = messagesArray[messagesArray.length - 1];
-          setLastReadMessageId(lastMessage.id);
-          setUnreadCount(0);
+      // Lấy currentUser
+      const savedUser = localStorage.getItem("user");
+      let currentUserId = null;
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          currentUserId = user.id;
+        } catch {
           return;
         }
-
-        // Đếm tin nhắn chưa đọc: tin nhắn không phải của vet hiện tại
-        // và có id lớn hơn lastReadMessageId (tin nhắn mới sau lần đọc cuối)
-        const unread = messagesArray.filter((m) => {
-          if (m.senderId === currentUserId) return false;
-          if (lastReadMessageId === null) return true; // Chưa đọc lần nào
-          return m.id > lastReadMessageId; // Tin nhắn mới sau lần đọc cuối
-        }).length;
-
-        setUnreadCount(unread);
-      } catch (err) {
-        console.error("Lỗi khi lấy số tin nhắn chưa đọc:", err);
       }
-    };
 
+      if (!currentUserId) return;
+
+      // Nếu ChatBox đang mở, cập nhật lastReadMessageId
+      if (isChatOpen && messagesArray.length > 0) {
+        const lastMessage = messagesArray[messagesArray.length - 1];
+        setLastReadMessageId(lastMessage.id);
+        setUnreadCount(0);
+        return;
+      }
+
+      // Đếm tin nhắn chưa đọc: tin nhắn không phải của vet hiện tại
+      // và có id lớn hơn lastReadMessageId (tin nhắn mới sau lần đọc cuối)
+      const unread = messagesArray.filter((m) => {
+        if (m.senderId === currentUserId) return false;
+        if (lastReadMessageId === null) return true; // Chưa đọc lần nào
+        return m.id > lastReadMessageId; // Tin nhắn mới sau lần đọc cuối
+      }).length;
+
+      setUnreadCount(unread);
+    } catch (err) {
+      console.error("Lỗi khi lấy số tin nhắn chưa đọc:", err);
+    }
+  };
+
+  // Lấy số tin nhắn chưa đọc
+  useEffect(() => {
     fetchUnreadCount();
     // Polling mỗi 5 giây để cập nhật
     const interval = setInterval(fetchUnreadCount, 5000);
@@ -331,12 +332,69 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
       Swal.fire("Lỗi!", err.message, "error");
     }
   };
+  // YÊU CẦU KHÁM TẠI NHÀ
+  const handleRequestHomeVisit = async () => {
+    const { value: formData } = await Swal.fire({
+      title: "Yêu cầu khám tại nhà",
+      html: `
+        <textarea id="notesInput" class="swal2-textarea" placeholder="Ghi chú (tùy chọn)..."></textarea>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Xác nhận",
+      cancelButtonText: "Hủy",
+      focusConfirm: false,
+      preConfirm: () => {
+        const notes = document.getElementById("notesInput").value.trim();
+        return notes || null;
+      },
+    });
+
+    if (formData === undefined) return; // Người dùng hủy
+
+    try {
+      // Tạo request body theo format API yêu cầu
+      // Có thể là: { "notes": "..." }, { "notes": null }, hoặc {}
+      const requestBody = formData ? { notes: formData } : { notes: null };
+
+      const res = await fetch(
+        `http://localhost:8080/api/vet/appointments/${appointmentId}/request-home-visit`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${vetToken}`,
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Yêu cầu khám tại nhà thất bại");
+      }
+
+      const updated = await res.json();
+      setAppointment(updated);
+      onApproved?.(updated);
+
+      // Refresh tin nhắn sau khi yêu cầu khám tại nhà thành công
+      // (Backend tự động gửi tin nhắn thông báo)
+      await fetchUnreadCount();
+
+      Swal.fire("Thành công!", "Đã gửi yêu cầu khám tại nhà", "success");
+    } catch (err) {
+      Swal.fire("Lỗi!", err.message, "error");
+    }
+  };
+
   // UI
   if (loading) return <div>Đang tải chi tiết lịch hẹn...</div>;
   if (error) return <div style={{ color: "red" }}>{error}</div>;
   if (!appointment) return <div>Không tìm thấy lịch hẹn.</div>;
 
   const isPending = appointment.status === "PENDING";
+  const isApproved = appointment.status === "APPROVED";
+  const isNotHomeVisit = appointment.locationType !== "AT_HOME";
 
   // Lấy thông tin vet hiện tại
   const getCurrentUser = () => {
@@ -487,32 +545,38 @@ const DetailAppointment = ({ appointmentId, onBack, onApproved }) => {
       </div>
       {/* Buttons */}
       <div className="btn-group">
-  {isPending && (
-    <div className="approve-reject-group">
-      <button
-        className="approve"
-        onClick={handleApprove}
-      >
-        Duyệt lịch
-      </button>
+        {isPending && (
+          <div className="approve-reject-group">
+            <button className="approve" onClick={handleApprove}>
+              Duyệt lịch
+            </button>
 
-      <button
-        className="reject"
-        onClick={handleReject}
-      >
-        Từ chối
-      </button>
-    </div>
-  )}
+            <button className="reject" onClick={handleReject}>
+              Từ chối
+            </button>
+          </div>
+        )}
 
-  <ButtonMessage
-    onClick={handleMessage}
-    text="Nhắn tin"
-    variant="secondary"
-    icon="ri-message-3-line"
-    unreadCount={unreadCount}
-  />
-</div>
+        {/* Hiển thị nút "Yêu cầu khám tại nhà" cho đơn đã duyệt 
+            nhưng chưa phải khám tại nhà */}
+        {isApproved && isNotHomeVisit && (
+          <button
+            className="request-home-visit-btn"
+            onClick={handleRequestHomeVisit}
+          >
+            <i className="ri-home-4-line"></i>
+            Yêu cầu khám tại nhà
+          </button>
+        )}
+
+        <ButtonMessage
+          onClick={handleMessage}
+          text="Nhắn tin"
+          variant="secondary"
+          icon="ri-message-3-line"
+          unreadCount={unreadCount}
+        />
+      </div>
 
       {/* ChatBox */}
       {isChatOpen && (

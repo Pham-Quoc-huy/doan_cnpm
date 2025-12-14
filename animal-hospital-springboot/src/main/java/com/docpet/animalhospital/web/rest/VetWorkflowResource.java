@@ -304,6 +304,26 @@ public class VetWorkflowResource {
         Appointment appointment = appointmentRepository.findOneWithEagerRelationships(id)
             .orElseThrow(() -> new BadRequestAlertException("Appointment not found", ENTITY_NAME, "notfound"));
         
+        // Kiểm tra xem appointment đã yêu cầu khám tại nhà chưa
+        if ("AT_HOME".equals(appointment.getLocationType())) {
+            throw new BadRequestAlertException(
+                "Appointment đã được yêu cầu khám tại nhà rồi", 
+                ENTITY_NAME, 
+                "homevisit.already.requested"
+            );
+        }
+        
+        // Kiểm tra xem đã có AppointmentAction REQUEST_HOME_VISIT chưa
+        List<AppointmentAction> existingHomeVisitActions = appointmentActionRepository
+            .findByAppointment_IdAndActionType(id, "REQUEST_HOME_VISIT");
+        if (!existingHomeVisitActions.isEmpty()) {
+            throw new BadRequestAlertException(
+                "Appointment đã có yêu cầu khám tại nhà trước đó", 
+                ENTITY_NAME, 
+                "homevisit.already.exists"
+            );
+        }
+        
         // Chỉ update locationType, giữ nguyên các relationships
         appointment.setLocationType("AT_HOME");
         appointment = appointmentRepository.save(appointment);
