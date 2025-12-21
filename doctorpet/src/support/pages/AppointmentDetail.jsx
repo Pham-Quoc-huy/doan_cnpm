@@ -43,7 +43,7 @@ const AppointmentDetail = () => {
     return (
         <div className="detail-content">
             <div className="detail-card">
-                <button className="back-btn" >
+                <button className="back-btn" onClick={() => window.history.back()}>
                     <i className="ri-arrow-left-line"></i> Quay lại
                 </button>
                 <h2>Chi tiết lịch hẹn</h2>
