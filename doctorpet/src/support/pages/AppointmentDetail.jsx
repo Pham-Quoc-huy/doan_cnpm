@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "remixicon/fonts/remixicon.css";
 import "../css/AppointmentDetail.css";
 import { useParams } from "react-router-dom";
-import { formatDateTime, getLocation, getBadgeClass } from '../components/appointmentFormatter';
 
 
 const AppointmentDetail = () => {
@@ -37,137 +36,132 @@ const AppointmentDetail = () => {
         fetchAppointment();
     }, [id]);
 
-    const formatDateTime = (timeStr) => {
-        if (!timeStr) return "";
-        const d = new Date(timeStr);
-        const pad = (n) => n.toString().padStart(2, "0");
-        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} - ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    };
-
-    const getBadgeClass = (type) => {
-        const map = {
-            EMERGENCY: "badge-emergency",
-            NORMAL: "badge-normal",
-        };
-        return map[type] || "badge";
-    };
-
-    const getLocation = (loc) => {
-        return loc === "AT_HOME"
-            ? "Tại nhà"
-            : loc === "AT_CLINIC"
-                ? "Tại phòng khám"
-                : loc === "ONLINE"
-                    ? "Tư vấn online"
-                    : loc;
-    };
 
     if (loading) return <p>Đang tải dữ liệu...</p>;
     if (!appointment) return <p>Không tìm thấy lịch hẹn.</p>;
 
     return (
         <div className="detail-content">
-            <div className="detail-wrapper">
-                <h2 className="detail-title">
-                    <i className="ri-file-list-3-line"></i>
-                    Chi tiết lịch hẹn
-                </h2>
-
-                <div className="detail-card">
-                    {/* Header */}
-                    <div className="detail-header">
-                        <div className="detail-pet">
-                            <div className="pet-avatar-detail">
-                                {appointment.pet?.name?.charAt(0)}
+            <div className="detail-card">
+                <button className="back-btn" >
+                    <i className="ri-arrow-left-line"></i> Quay lại
+                </button>
+                <h2>Chi tiết lịch hẹn</h2>
+                {/* Header */}
+                <div className="row">
+                    <p>
+                        <strong>Trạng thái:</strong>{" "}
+                        {appointment.status === "PENDING"
+                            ? "Chờ duyệt"
+                            : appointment.status === "APPROVED"
+                                ? "Đã duyệt"
+                                : appointment.status === "REJECTED"
+                                    ? "Từ chối"
+                                    : "Đổi lịch"}
+                    </p>
+                    <p>
+                        <strong>Bắt đầu:</strong>{" "}
+                        {new Date(appointment.timeStart).toLocaleString()}
+                    </p>
+                    <p>
+                        <strong>Kết thúc:</strong>{" "}
+                        {new Date(appointment.timeEnd).toLocaleString()}
+                    </p>
+                </div>
+                <div className="row">
+                    <p>
+                        <strong>Loại lịch hẹn:</strong>{" "}
+                        {appointment.type === "CHECKUP"
+                            ? "Kiểm tra sức khỏe"
+                            : appointment.type === "VACCINE"
+                                ? "Tiêm chủng"
+                                : "Phẫu thuật"}
+                    </p>
+                    <p>
+                        <strong>Tình trạng:</strong>{" "}
+                        {appointment.appointmentType === "EMERGENCY"
+                            ? "Khẩn Cấp"
+                            : "Bình Thường"}
+                    </p>
+                    <p>
+                        <strong>Vị trí:</strong>{" "}
+                        {appointment.locationType === "AT_HOME"
+                            ? "Tại nhà"
+                            : appointment.locationType === "AT_CLINIC"
+                                ? "Tại phòng khám"
+                                : ""}
+                    </p>
+                </div>
+                <p>
+                    <strong>Ghi chú:</strong> {appointment.notes || "Không có"}
+                </p>
+                {/* Thông tin Pet */}
+                <div className="row">
+                    {appointment.pet && (
+                        <div>
+                            <h3>Thông tin thú cưng</h3>
+                            <div className="row">
+                                <p>
+                                    <strong>Tên:</strong> {appointment.pet.name}
+                                </p>
+                                <p>
+                                    <strong>Loài:</strong> {appointment.pet.species}
+                                </p>
                             </div>
-                            <div>
-                                <h3 className="pet-name-detail">{appointment.pet?.name}</h3>
-                                <p className="pet-vet-detail">với BS: {appointment.vet.lastName + " " + appointment.vet.firstName}</p>
+                            <div className="row">
+                                <p>
+                                    <strong>Giống loài:</strong> {appointment.pet.breed}
+                                </p>
+                                <p>
+                                    <strong>Giới tính:</strong> {appointment.pet.sex}
+                                </p>
                             </div>
-                        </div>
-
-                        <span className={`badge-detail ${getBadgeClass(appointment.appointmentType)}`}>
-                            {appointment.appointmentType}
-                        </span>
-                    </div>
-
-                    {/* Info */}
-                    <div className="detail-info-grid">
-                        <div className="info-row">
-                            <i className="ri-calendar-line icon-info"></i>
-                            <div>
-                                <strong>Thời gian</strong>
-                                <p>{formatDateTime(appointment.timeStart)}</p>
+                            <div className="row">
+                                <p>
+                                    <strong>Ngày sinh:</strong> {appointment.pet.dateOfBirth}
+                                </p>
+                                <p>
+                                    <strong>Cân nặng:</strong> {appointment.pet.weight} kg
+                                </p>
                             </div>
-                        </div>
-
-                        <div className="info-row">
-                            <i
-                                className={`icon-info ${appointment.locationType === "AT_HOME"
-                                    ? "ri-home-4-line text-green-600"
-                                    : appointment.locationType === "AT_CLINIC"
-                                        ? "ri-hospital-line text-indigo-600"
-                                        : "ri-video-chat-line text-purple-600"
-                                    }`}
-                            ></i>
-                            <div>
-                                <strong>Hình thức</strong>
-                                <p>{getLocation(appointment.locationType)}</p>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div className="detail-info-grid">
-                        <div className="info-row">
-                            <i className="ri-stethoscope-line" style={{ color: "#0ea5e9" }}></i>
-                            <div>
-                                <strong> Loại khám: </strong> {" "}
-                                {appointment.type === "CHECKUP"
-                                    ? "Kiểm tra sức khỏe"
-                                    : appointment.type === "VACCINE"
-                                        ? "Tiêm chủng"
-                                        : "Phẫu thuật"}
-                            </div>
-                        </div>
-
-                        <div className="info-row">
-                            <i className="ri-time-line icon-info text-orange-600"></i>
-                            <div>
-                                <strong>Trạng thái</strong>{""}
-                                <p className="text-orange-700 font-medium">
-                                    {appointment.status === "PENDING"
-                                        ? "Chờ duyệt"
-                                        : appointment.status === "APPROVED"
-                                            ? "Đã duyệt"
-                                            : appointment.status === "REJECTED"
-                                                ? "Từ chối"
-                                                : "Đổi lịch"}
+                            <div className="row">
+                                <p>
+                                    <strong>Dị ứng:</strong>{" "}
+                                    {appointment.pet.allergies || "Không có"}
+                                </p>
+                                <p>
+                                    <strong>Ghi chú:</strong> {appointment.pet.notes || "Không có"}
                                 </p>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Notes */}
-                    {appointment.notes && (
-                        <div className="detail-section">
-                            <h4 className="section-title">
-                                <i className="ri-file-text-line"></i> Ghi chú
-                            </h4>
-                            <p className="notes-text">{appointment.notes}</p>
-                        </div>
                     )}
 
-                    {/* Footer */}
-                    <div className="detail-footer">
-                        <div className="price-box">
-                            <span className="price-label">Tổng chi phí</span>
-                            <span className="price-value">Chưa xác định</span>
+                    {/* Thông tin chủ nuôi */}
+                    {appointment.owner && (
+                        <div>
+                            <h3>Thông tin chủ nuôi</h3>
+                            <div className="row">
+                                <p>
+                                    <strong>Tên:</strong> {appointment.owner.name}
+                                </p>
+                                <p>
+                                    <strong>Họ và tên:</strong> {appointment.owner.firstName}{" "}
+                                    {appointment.owner.lastName}
+                                </p>
+                                <p>
+                                    <strong>Số điện thoại:</strong> {appointment.owner.phone}
+                                </p>
+                                <p>
+                                    <strong>Địa chỉ:</strong> {appointment.owner.address}
+                                </p>
+                            </div>
                         </div>
-
-                    </div>
+                    )}
                 </div>
 
+
             </div>
+
         </div>
     );
 };
