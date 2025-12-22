@@ -12,8 +12,8 @@ const PetItem = (props) => {
     setShowMenu(false);
   };
   const handleDelete = () => {
-      props.handleDeletePet(props.id);
-      setShowMenu(false);
+    props.handleDeletePet(props.id);
+    setShowMenu(false);
   };
   return (
     <div className="pet-item">
@@ -22,19 +22,48 @@ const PetItem = (props) => {
       </div>
       {showMenu && (
         <div className="pet-option">
-          <button className="pet-delete" onClick={handleDelete}>Xóa</button>
-          <button className="pet-update" onClick={handleViewOrEdit}>Sửa</button>
-          <button className="pet-read" onClick={handleViewOrEdit}>Xem</button>
+          <button className="pet-delete" onClick={handleDelete}>
+            Xóa
+          </button>
+          <button className="pet-update" onClick={handleViewOrEdit}>
+            Sửa
+          </button>
+          <button className="pet-read" onClick={handleViewOrEdit}>
+            Xem
+          </button>
         </div>
       )}
 
-      <img className="pet-avatar" src={props.imageUrl} alt={props.name || "pet"} />
+      <img
+        className="pet-avatar"
+        src={props.imageUrl}
+        alt={props.name || "pet"}
+      />
 
       <div className="pet-info-profile">
-        <div className="pet-field">{props.name}</div>
-        <div className="pet-field">{props.dateOfBirth}</div>
-        <div className="pet-field">{props.weight}</div>
-        <div className="pet-field">{props.allergies}</div>
+        <div className="pet-field">
+          <i className="ri-paw-fill"></i>
+          <span className="pet-label">Tên</span>
+          <span>{props.name}</span>
+        </div>
+
+        <div className="pet-field">
+          <i className="ri-calendar-2-fill"></i>
+          <span className="pet-label">Sinh</span>
+          <span>{props.dateOfBirth}</span>
+        </div>
+
+        <div className="pet-field">
+          <i className="ri-weight-fill"></i>
+          <span className="pet-label">Cân nặng</span>
+          <span>{props.weight}</span>
+        </div>
+
+        <div className="pet-field">
+          <i className="ri-alert-fill"></i>
+          <span className="pet-label">Dị ứng</span>
+          <span>{props.allergies}</span>
+        </div>
       </div>
     </div>
   );
