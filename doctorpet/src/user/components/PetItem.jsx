@@ -36,8 +36,14 @@ const PetItem = (props) => {
 
       <img
         className="pet-avatar"
-        src={props.imageUrl}
+        src={props.imageUrl || "/assets/meme.jpg"}
         alt={props.name || "pet"}
+        onError={(e) => {
+          // Nếu ảnh lỗi, hiển thị ảnh mặc định
+          if (e.target.src !== "/assets/meme.jpg") {
+            e.target.src = "/assets/meme.jpg";
+          }
+        }}
       />
 
       <div className="pet-info-profile">

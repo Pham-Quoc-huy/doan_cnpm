@@ -51,16 +51,12 @@ body {
 }
 
 .pet-avatar {
-    width: 36px;
-    height: 36px;
-    background-color: #0a7df0;
-    color: white;
-    font-weight: bold;
-    font-size: 1.125rem;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    object-fit: cover;
+    background-color: #0a7df0;
+    flex-shrink: 0;
 }
 
 .pet-name {

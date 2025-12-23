@@ -91,6 +91,9 @@ const MAvatar = ({
   const size = type === "offer" ? 70 : 90;
   const sizeClass = type === "offer" ? "mavatar-offer" : "mavatar-list";
 
+  // Ảnh mặc định
+  const defaultImageUrl = "/assets/meme.jpg";
+
   return (
     <div className={`mavatar-wrapper ${sizeClass} ${className}`}>
       {hasImage ? (
@@ -99,21 +102,23 @@ const MAvatar = ({
           src={finalImageUrl}
           alt={alt}
           onError={(e) => {
-            // Nếu ảnh lỗi, ẩn img và hiển thị placeholder
-            e.target.style.display = "none";
-            const placeholder = e.target.parentElement.querySelector(
-              ".mavatar-placeholder"
-            );
-            if (placeholder) placeholder.style.display = "flex";
+            // Nếu ảnh lỗi, hiển thị ảnh mặc định
+            if (e.target.src !== defaultImageUrl) {
+              e.target.src = defaultImageUrl;
+            }
           }}
         />
-      ) : null}
-      <div
-        className="mavatar-placeholder"
-        style={{ display: hasImage ? "none" : "flex" }}
-      >
-        <span className="mavatar-placeholder-text">PetImageNotFound</span>
-      </div>
+      ) : (
+        <img
+          className={`mavatar-image ${privacy === false ? "mavatar-blur" : ""}`}
+          src={defaultImageUrl}
+          alt={alt}
+          onError={(e) => {
+            // Nếu ảnh mặc định cũng lỗi, ẩn ảnh
+            e.target.style.display = "none";
+          }}
+        />
+      )}
     </div>
   );
 };

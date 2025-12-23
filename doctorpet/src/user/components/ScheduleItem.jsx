@@ -144,7 +144,17 @@ const ScheduleItem = (props) => {
         <div className="appointment-card">
           <div className="card-header">
             <div className="pet-info">
-              <div className="pet-avatar">{props.pet.name}</div>
+              <img
+                className="pet-avatar"
+                src={props.pet.imageUrl || props.pet.image_url || "/assets/meme.jpg"}
+                alt={props.pet.name || "pet"}
+                onError={(e) => {
+                  // Nếu ảnh lỗi, hiển thị ảnh mặc định
+                  if (e.target.src !== "/assets/meme.jpg") {
+                    e.target.src = "/assets/meme.jpg";
+                  }
+                }}
+              />
               <div>
                 <h3 className="pet-name">{props.pet.name}</h3>
                 <p className="pet-vet">với {props.vet.name}</p>

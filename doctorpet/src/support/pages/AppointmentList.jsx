@@ -60,7 +60,21 @@ const AppointmentList = () => {
             <div key={app.id} className="appointment-card">
               <div className="card-header">
                 <div className="pet-info">
-                  <div className="pet-avatar">{app.pet.name[0]}</div>
+                  <img
+                    className="pet-avatar"
+                    src={
+                      app.pet.imageUrl ||
+                      app.pet.image_url ||
+                      "/assets/meme.jpg"
+                    }
+                    alt={app.pet.name || "pet"}
+                    onError={(e) => {
+                      // Nếu ảnh lỗi, hiển thị ảnh mặc định
+                      if (e.target.src !== "/assets/meme.jpg") {
+                        e.target.src = "/assets/meme.jpg";
+                      }
+                    }}
+                  />
                   <div>
                     <h3 className="pet-name">{app.pet.name}</h3>
                     <p className="pet-vet">
