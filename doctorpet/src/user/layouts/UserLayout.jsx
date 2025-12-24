@@ -100,11 +100,12 @@ const UserLayout = () => {
       try {
         const userData = JSON.parse(savedUser);
         console.log("Current User Data:", userData);
+        const fullName = `${userData.firstName} ${userData.lastName}`.trim();
         return {
           id: userData.id,
-          name: `${userData.firstName} ${userData.lastName}` || "Bạn",
+          name: fullName || "Bạn",
         };
-      } catch (e) {
+      } catch {
         return null;
       }
     }
@@ -166,7 +167,7 @@ const UserLayout = () => {
               isUnread: isUnread,
               timestamp: latestMessage.timestamp,
             };
-          } catch (err) {
+          } catch {
             return null;
           }
         });
