@@ -8,7 +8,14 @@ import SupportLayout from './support/layouts/SupportLayout'
 import ScheduleItem from './user/components/ScheduleItem'
 import UserLayout from './user/layouts/UserLayout'
 import Support from './support/routes/App'
+import GlobalContactButton from './components/GlobalContactButton'
+
 function App() {
-  return <AppRouter />
+  return (
+    <>
+      <AppRouter />
+      <GlobalContactButton />
+    </>
+  )
 }
 export default App

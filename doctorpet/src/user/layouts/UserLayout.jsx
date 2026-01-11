@@ -25,6 +25,7 @@ const UserLayout = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
+  const [allAppointments, setAllAppointments] = useState([]);
   useEffect(() => {
     const fetchOwners = async () => {
       try {
@@ -138,6 +139,9 @@ const UserLayout = () => {
         const appointments = await appointmentsRes.json();
         const appointmentList = appointments.content || appointments;
 
+        // Lưu danh sách appointments để dùng cho nút liên hệ
+        setAllAppointments(appointmentList);
+
         // Lấy tin nhắn mới nhất cho mỗi appointment
         const notificationPromises = appointmentList.map(async (appt) => {
           try {
@@ -240,9 +244,40 @@ const UserLayout = () => {
       });
     }
   };
+  // Xử lý khi click nút "Liên hệ"
+  const handleContactClick = () => {
+    if (allAppointments.length > 0) {
+      // Lấy appointment đầu tiên
+      const firstAppointment = allAppointments[0];
+      setSelectedAppointmentId(firstAppointment.id);
+      setIsChatOpen(true);
+      setIsChatMinimized(false);
+    } else {
+      // Nếu chưa có appointment, thông báo cho user
+      Swal.fire({
+        title: "Chưa có lịch hẹn",
+        text: "Bạn cần đặt lịch hẹn trước khi có thể liên hệ với bác sĩ.",
+        icon: "info",
+        confirmButtonText: "Đặt lịch ngay",
+        confirmButtonColor: "#ed8a43",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setActive("appointment");
+        }
+      });
+    }
+  };
+
+  // Lấy thông tin appointment được chọn
+  const getSelectedAppointment = () => {
+    if (!selectedAppointmentId) return null;
+    return allAppointments.find((appt) => appt.id === selectedAppointmentId);
+  };
+
   if (loading) return <p>Đang tải dữ liệu...</p>;
   if (error) return <p>Lỗi: {error}</p>;
   console.log("User Info:", userInfo);
+  const selectedAppointment = getSelectedAppointment();
   return (
     <>
       <Header />
@@ -396,11 +431,15 @@ const UserLayout = () => {
               appointmentId={selectedAppointmentId}
               currentUser={getCurrentUser()}
               recipientName={
+                selectedAppointment?.vet?.fullName ||
+                selectedAppointment?.vet?.name ||
                 notifications.find(
                   (n) => n.appointmentId === selectedAppointmentId
-                )?.appointment?.vet?.name || "Bác sĩ"
+                )?.appointment?.vet?.name ||
+                "Bác sĩ"
               }
               recipientAvatar={
+                selectedAppointment?.vet?.avatar ||
                 notifications.find(
                   (n) => n.appointmentId === selectedAppointmentId
                 )?.appointment?.vet?.avatar
