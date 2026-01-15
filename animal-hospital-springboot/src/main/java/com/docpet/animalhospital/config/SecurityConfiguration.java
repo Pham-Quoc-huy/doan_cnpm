@@ -25,7 +25,9 @@ import org.springframework.security.oauth2.server.resource.web.access.BearerToke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
@@ -83,6 +85,7 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/api/activate")).permitAll()
                     .requestMatchers(mvc.pattern("/api/account/reset-password/init")).permitAll()
                     .requestMatchers(mvc.pattern("/api/account/reset-password/finish")).permitAll()
+                    .requestMatchers(mvc.pattern("/api/chat/public/**")).permitAll() // Cho phép anonymous chat
                     .requestMatchers(mvc.pattern("/v3/api-docs/**")).permitAll()
                     .requestMatchers(mvc.pattern("/swagger-ui/**")).permitAll()
                     .requestMatchers(mvc.pattern("/management/health")).permitAll()
@@ -102,10 +105,38 @@ public class SecurityConfiguration {
                     .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
             )
             .oauth2ResourceServer(oauth2 -> 
-                oauth2.jwt(jwt -> {
-                    jwt.decoder(jwtDecoder);
-                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
-                })
+                oauth2
+                    .jwt(jwt -> {
+                        jwt.decoder(jwtDecoder);
+                        jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
+                    })
+                    .bearerTokenResolver(new BearerTokenResolver() {
+                        @Override
+                        public String resolve(HttpServletRequest request) {
+                            // Nếu là public endpoint, không cần JWT token
+                            String path = request.getRequestURI();
+                            if (path != null && (
+                                path.startsWith("/api/authenticate") ||
+                                path.startsWith("/api/register") ||
+                                path.startsWith("/api/activate") ||
+                                path.startsWith("/api/account/reset-password") ||
+                                path.startsWith("/api/chat/public") ||
+                                path.startsWith("/v3/api-docs") ||
+                                path.startsWith("/swagger-ui") ||
+                                path.startsWith("/management/health") ||
+                                path.startsWith("/management/info") ||
+                                path.startsWith("/management/prometheus")
+                            )) {
+                                return null; // Không yêu cầu token cho public endpoints
+                            }
+                            // Lấy token từ header cho protected endpoints
+                            String bearerToken = request.getHeader("Authorization");
+                            if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+                                return bearerToken.substring(7);
+                            }
+                            return null;
+                        }
+                    })
             );
         return http.build();
     }

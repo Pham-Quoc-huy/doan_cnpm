@@ -28,9 +28,17 @@ const ChatBox = ({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Lấy danh sách tin nhắn
+  // Lấy danh sách tin nhắn (chỉ khi có appointmentId - chat với vet)
+  // Nếu không có appointmentId, đây là chatbot công khai, không cần fetch lịch sử
   useEffect(() => {
-    if (!appointmentId || !isOpen || isMinimized) return;
+    if (!isOpen || isMinimized) return;
+
+    // Nếu không có appointmentId, đây là chatbot công khai - không cần fetch messages
+    if (!appointmentId) {
+      setMessages([]);
+      setLoading(false);
+      return;
+    }
 
     const fetchMessages = async () => {
       setLoading(true);
@@ -61,7 +69,7 @@ const ChatBox = ({
 
     fetchMessages();
 
-    // Polling để cập nhật tin nhắn mới (mỗi 3 giây)
+    // Polling để cập nhật tin nhắn mới (mỗi 3 giây) - chỉ cho chat với vet
     const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
   }, [appointmentId, isOpen, isMinimized]);
@@ -76,35 +84,40 @@ const ChatBox = ({
   // Gửi tin nhắn mới
   const sendMessage = async () => {
     const messageText = input.trim();
-    
+
     // Validation
     if (!messageText) {
       setError("Tin nhắn không được để trống");
       return;
     }
-    
+
     if (messageText.length > MAX_MESSAGE_LENGTH) {
       setError(`Tin nhắn không được vượt quá ${MAX_MESSAGE_LENGTH} ký tự`);
       return;
     }
 
-    if (!appointmentId) {
-      setError("Không tìm thấy lịch hẹn");
-      return;
-    }
-
     setSending(true);
     setError("");
+
+    // Thêm tin nhắn của user vào danh sách ngay lập tức
+    const userMessage = {
+      id: Date.now(),
+      message: messageText,
+      senderId: currentUser?.id,
+      senderName: currentUser?.name || "Bạn",
+      timestamp: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
     setInput(""); // Clear input ngay để UX tốt hơn
 
     try {
+      // Gọi API chatbot công khai
       const res = await fetch(
-        `http://localhost:8080/api/appointments/${appointmentId}/messages`,
+        `http://localhost:8080/api/chat/public/messages`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
           },
           body: JSON.stringify({ message: messageText }),
         }
@@ -116,11 +129,47 @@ const ChatBox = ({
       }
 
       const data = await res.json();
-      // Thêm tin nhắn mới vào danh sách
-      setMessages((prev) => [...prev, data]);
+
+      // Xử lý response từ chatbot
+      // Lấy nội dung từ trường "response" nếu có, bỏ qua sessionId, createdDate
+      let messageContent = "";
+      
+      if (typeof data === "string") {
+        messageContent = data;
+      } else if (data.response) {
+        // Lấy nội dung từ trường "response"
+        messageContent = data.response;
+      } else if (data.message) {
+        messageContent = data.message;
+      } else if (data.content) {
+        messageContent = data.content;
+      } else {
+        // Fallback: chỉ lấy các trường không phải metadata
+        const { sessionId, createdDate, ...rest } = data;
+        messageContent = JSON.stringify(rest);
+      }
+      
+      // Loại bỏ các ký tự xuống dòng thừa và làm sạch nội dung
+      messageContent = messageContent
+        .replace(/\\n/g, "\n") // Chuyển \n thành xuống dòng thực sự
+        .replace(/\n{3,}/g, "\n\n") // Giảm nhiều xuống dòng liên tiếp thành 2
+        .trim();
+
+      const botMessage = {
+        id: Date.now() + 1,
+        message: messageContent,
+        senderId: "bot",
+        senderName: "Chatbot",
+        timestamp: new Date().toISOString(),
+      };
+
+      // Thêm phản hồi từ chatbot vào danh sách
+      setMessages((prev) => [...prev, botMessage]);
     } catch (err) {
       console.error("Lỗi khi gửi tin nhắn:", err);
       setError(err.message || "Không thể gửi tin nhắn. Vui lòng thử lại.");
+      // Xóa tin nhắn user nếu gửi thất bại
+      setMessages((prev) => prev.filter((msg) => msg.id !== userMessage.id));
       setInput(messageText); // Khôi phục lại text nếu gửi thất bại
     } finally {
       setSending(false);
@@ -167,7 +216,9 @@ const ChatBox = ({
               title={isMinimized ? "Mở rộng" : "Thu nhỏ"}
             >
               <i
-                className={isMinimized ? "ri-fullscreen-line" : "ri-subtract-line"}
+                className={
+                  isMinimized ? "ri-fullscreen-line" : "ri-subtract-line"
+                }
               ></i>
             </button>
           )}
@@ -245,12 +296,15 @@ const ChatBox = ({
           {/* Input Area */}
           <div className="chat-box-input-area">
             {error && messages.length > 0 && (
-              <div className="chat-box-error" style={{ 
-                color: "#ef4444", 
-                fontSize: "12px", 
-                padding: "4px 12px",
-                marginBottom: "8px"
-              }}>
+              <div
+                className="chat-box-error"
+                style={{
+                  color: "#ef4444",
+                  fontSize: "12px",
+                  padding: "4px 12px",
+                  marginBottom: "8px",
+                }}
+              >
                 <i className="ri-error-warning-line"></i> {error}
               </div>
             )}
@@ -275,22 +329,32 @@ const ChatBox = ({
                 className="chat-box-send-btn"
                 onClick={sendMessage}
                 disabled={!input.trim() || sending}
-                title={input.length > MAX_MESSAGE_LENGTH * 0.9 ? `Còn ${MAX_MESSAGE_LENGTH - input.length} ký tự` : ""}
+                title={
+                  input.length > MAX_MESSAGE_LENGTH * 0.9
+                    ? `Còn ${MAX_MESSAGE_LENGTH - input.length} ký tự`
+                    : ""
+                }
               >
                 {sending ? (
-                  <i className="ri-loader-4-line" style={{ animation: "spin 1s linear infinite" }}></i>
+                  <i
+                    className="ri-loader-4-line"
+                    style={{ animation: "spin 1s linear infinite" }}
+                  ></i>
                 ) : (
                   <i className="ri-send-plane-fill"></i>
                 )}
               </button>
             </div>
             {input.length > MAX_MESSAGE_LENGTH * 0.8 && (
-              <div style={{ 
-                fontSize: "11px", 
-                color: input.length >= MAX_MESSAGE_LENGTH ? "#ef4444" : "#f59e0b",
-                padding: "4px 12px",
-                textAlign: "right"
-              }}>
+              <div
+                style={{
+                  fontSize: "11px",
+                  color:
+                    input.length >= MAX_MESSAGE_LENGTH ? "#ef4444" : "#f59e0b",
+                  padding: "4px 12px",
+                  textAlign: "right",
+                }}
+              >
                 {input.length}/{MAX_MESSAGE_LENGTH} ký tự
               </div>
             )}
@@ -302,4 +366,3 @@ const ChatBox = ({
 };
 
 export default ChatBox;
-
