@@ -54,8 +54,7 @@ public class ChatService {
                 errorResponse.setSessionId(sessionId);
                 errorResponse.setResponse(
                     "Xin chào! Tôi là bác sĩ thú y AI. " +
-                    "Để tôi có thể tư vấn chính xác, vui lòng cho biết thú cưng của bạn là chó hay mèo. " +
-                    "Ví dụ: 'chó của tôi bị nôn' hoặc 'mèo bị tiêu chảy'."
+                    "Để tôi có thể tư vấn chính xác, vui lòng cho biết thú cưng của bạn là chó hay mèo."
                 );
                 return errorResponse;
             }
@@ -198,15 +197,8 @@ public class ChatService {
         DiseaseDTO firstDisease = diseaseList.get(0);
         StringBuilder response = new StringBuilder();
         
-        response.append("Dựa trên câu hỏi của bạn, đây là thông tin liên quan:\n\n");
         response.append("**").append(firstDisease.getTitle()).append("**\n\n");
         response.append(firstDisease.getContent());
-        
-        if (diseaseList.size() > 1) {
-            response.append("\n\n---\n");
-            response.append("Lưu ý: Còn ").append(diseaseList.size() - 1)
-                    .append(" thông tin bệnh liên quan khác. ");
-        }
         
         response.append("\n\n⚠️ **Quan trọng:** Đây chỉ là thông tin tham khảo. ");
         response.append("Nếu thú cưng của bạn có triệu chứng nghiêm trọng, ");

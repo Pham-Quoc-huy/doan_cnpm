@@ -111,60 +111,85 @@ const ChatBox = ({
     setInput(""); // Clear input ngay để UX tốt hơn
 
     try {
-      // Gọi API chatbot công khai
-      const res = await fetch(
-        `http://localhost:8080/api/chat/public/messages`,
-        {
+      let res;
+      let data;
+
+      // Nếu có appointmentId → chat với vet, không có → chatbot công khai
+      if (appointmentId) {
+        // Chat với vet về appointment (cần JWT)
+        res = await fetch(
+          `http://localhost:8080/api/appointments/${appointmentId}/messages`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+            },
+            body: JSON.stringify({ message: messageText }),
+          }
+        );
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(errorText || "Không thể gửi tin nhắn");
+        }
+
+        data = await res.json();
+        // Response từ API chat với vet đã có đầy đủ thông tin message
+        setMessages((prev) => [...prev, data]);
+      } else {
+        // Chatbot công khai (không cần JWT, ai cũng dùng được)
+        res = await fetch(`http://localhost:8080/api/chat/public/messages`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ message: messageText }),
+        });
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(errorText || "Không thể gửi tin nhắn");
         }
-      );
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "Không thể gửi tin nhắn");
+        data = await res.json();
+
+        // Xử lý response từ chatbot
+        // Lấy nội dung từ trường "response" nếu có, bỏ qua sessionId, createdDate
+        let messageContent = "";
+
+        if (typeof data === "string") {
+          messageContent = data;
+        } else if (data.response) {
+          // Lấy nội dung từ trường "response"
+          messageContent = data.response;
+        } else if (data.message) {
+          messageContent = data.message;
+        } else if (data.content) {
+          messageContent = data.content;
+        } else {
+          // Fallback: chỉ lấy các trường không phải metadata
+          const { sessionId, createdDate, ...rest } = data;
+          messageContent = JSON.stringify(rest);
+        }
+
+        // Loại bỏ các ký tự xuống dòng thừa và làm sạch nội dung
+        messageContent = messageContent
+          .replace(/\\n/g, "\n") // Chuyển \n thành xuống dòng thực sự
+          .replace(/\n{3,}/g, "\n\n") // Giảm nhiều xuống dòng liên tiếp thành 2
+          .trim();
+
+        const botMessage = {
+          id: Date.now() + 1,
+          message: messageContent,
+          senderId: "bot",
+          senderName: "Chatbot",
+          timestamp: new Date().toISOString(),
+        };
+
+        // Thêm phản hồi từ chatbot vào danh sách
+        setMessages((prev) => [...prev, botMessage]);
       }
-
-      const data = await res.json();
-
-      // Xử lý response từ chatbot
-      // Lấy nội dung từ trường "response" nếu có, bỏ qua sessionId, createdDate
-      let messageContent = "";
-      
-      if (typeof data === "string") {
-        messageContent = data;
-      } else if (data.response) {
-        // Lấy nội dung từ trường "response"
-        messageContent = data.response;
-      } else if (data.message) {
-        messageContent = data.message;
-      } else if (data.content) {
-        messageContent = data.content;
-      } else {
-        // Fallback: chỉ lấy các trường không phải metadata
-        const { sessionId, createdDate, ...rest } = data;
-        messageContent = JSON.stringify(rest);
-      }
-      
-      // Loại bỏ các ký tự xuống dòng thừa và làm sạch nội dung
-      messageContent = messageContent
-        .replace(/\\n/g, "\n") // Chuyển \n thành xuống dòng thực sự
-        .replace(/\n{3,}/g, "\n\n") // Giảm nhiều xuống dòng liên tiếp thành 2
-        .trim();
-
-      const botMessage = {
-        id: Date.now() + 1,
-        message: messageContent,
-        senderId: "bot",
-        senderName: "Chatbot",
-        timestamp: new Date().toISOString(),
-      };
-
-      // Thêm phản hồi từ chatbot vào danh sách
-      setMessages((prev) => [...prev, botMessage]);
     } catch (err) {
       console.error("Lỗi khi gửi tin nhắn:", err);
       setError(err.message || "Không thể gửi tin nhắn. Vui lòng thử lại.");

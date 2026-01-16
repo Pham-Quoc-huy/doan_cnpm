@@ -2,11 +2,13 @@
 -- Script tạo 3 tables mới: species, disease_dog, disease_cat
 -- =====================================================
 
+-- Chọn database
+USE animalhospital;
+
 -- 1. Table: species (Loài thú cưng)
 CREATE TABLE IF NOT EXISTS species (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE COMMENT 'Tên loài: Chó, Mèo',
-    description VARCHAR(1000) COMMENT 'Mô tả về loài',
     is_active BOOLEAN DEFAULT TRUE,
     created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -51,11 +53,10 @@ CREATE TABLE IF NOT EXISTS disease_cat (
 -- =====================================================
 
 -- Insert species
-INSERT INTO species (name, description, is_active) VALUES
-('Chó', 'Chó là loài thú cưng phổ biến nhất, trung thành và thân thiện. Chó có nhiều giống khác nhau với đặc điểm và tính cách riêng biệt.', TRUE),
-('Mèo', 'Mèo là loài thú cưng độc lập và thông minh. Mèo thích chơi đùa, săn bắt và có tính cách độc đáo.', TRUE)
+INSERT INTO species (name, is_active) VALUES
+('Chó', TRUE),
+('Mèo', TRUE)
 ON DUPLICATE KEY UPDATE 
-    description = VALUES(description),
     is_active = VALUES(is_active);
 
 -- Insert disease_dog (Bệnh của Chó)

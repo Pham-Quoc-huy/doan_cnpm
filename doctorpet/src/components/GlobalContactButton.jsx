@@ -36,7 +36,7 @@ const GlobalContactButton = () => {
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
     const user = localStorage.getItem("user");
-    
+
     if (!jwt || !user) {
       setAllAppointments([]);
       return;
@@ -51,7 +51,7 @@ const GlobalContactButton = () => {
         });
 
         if (!response.ok) return;
-        
+
         const data = await response.json();
         const appointmentList = data.content || data;
         setAllAppointments(appointmentList);
@@ -61,7 +61,7 @@ const GlobalContactButton = () => {
     };
 
     fetchAppointments();
-    
+
     // Polling mỗi 10 giây để cập nhật danh sách appointments
     const interval = setInterval(fetchAppointments, 10000);
     return () => clearInterval(interval);
@@ -73,35 +73,25 @@ const GlobalContactButton = () => {
       setSelectedAppointment(null);
       return;
     }
-    const appointment = allAppointments.find((appt) => appt.id === selectedAppointmentId);
+    const appointment = allAppointments.find(
+      (appt) => appt.id === selectedAppointmentId
+    );
     setSelectedAppointment(appointment);
   }, [selectedAppointmentId, allAppointments]);
 
   // Xử lý khi click nút "Tư vấn"
   const handleContactClick = () => {
-    const jwt = localStorage.getItem("jwt");
-    const user = localStorage.getItem("user");
-
-    // Nếu đã đăng nhập và có appointments, mở chat với vet
-    if (jwt && user && allAppointments.length > 0) {
-      // Lấy appointment đầu tiên
-      const firstAppointment = allAppointments[0];
-      setSelectedAppointmentId(firstAppointment.id);
-      setIsChatOpen(true);
-      setIsChatMinimized(false);
-    } else {
-      // Nếu chưa đăng nhập hoặc không có appointment, mở chatbot công khai
-      setSelectedAppointmentId(null); // null = chatbot công khai
-      setIsChatOpen(true);
-      setIsChatMinimized(false);
-    }
+    // Luôn mở chatbot công khai trước (không cần đăng nhập, ai cũng dùng được)
+    setSelectedAppointmentId(null); // null = chatbot công khai
+    setIsChatOpen(true);
+    setIsChatMinimized(false);
   };
 
   return (
     <>
       {/* Ẩn nút "Tư vấn" khi khung chat đang mở (kể cả khi thu nhỏ) */}
       {!isChatOpen && <ContactButton onClick={handleContactClick} />}
-      
+
       {isChatOpen && (
         <ChatBox
           appointmentId={selectedAppointmentId} // null = chatbot công khai
@@ -130,4 +120,3 @@ const GlobalContactButton = () => {
 };
 
 export default GlobalContactButton;
-

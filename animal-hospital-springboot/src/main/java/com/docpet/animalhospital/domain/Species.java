@@ -25,10 +25,6 @@ public class Species implements Serializable {
     @Column(name = "name", nullable = false, length = 100, unique = true)
     private String name; // "Chó", "Mèo"
 
-    @Size(max = 1000)
-    @Column(name = "description", length = 1000)
-    private String description;
-
     @Column(name = "is_active")
     private Boolean isActive = true;
 
@@ -78,14 +74,6 @@ public class Species implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public Boolean getIsActive() {

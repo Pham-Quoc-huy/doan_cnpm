@@ -1,5 +1,6 @@
 -- =====================================================
--- Script INSERT dữ liệu vào bảng Species
+-- Script INSERT đơn giản - Chỉ insert dữ liệu
+-- Chạy script này sau khi đã chạy CREATE_SPECIES_AND_DISEASE_TABLES.sql
 -- =====================================================
 
 USE animalhospital;
