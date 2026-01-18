@@ -17,3 +17,4 @@ ADD COLUMN last_modified_date TIMESTAMP AFTER last_modified_by;
 DESCRIBE jhi_user;
 
 
+

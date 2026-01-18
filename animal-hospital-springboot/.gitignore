@@ -18,4 +18,6 @@ Thumbs.db
 
 # Environment
 *.env
+application-local.yml
+application-secret.yml
 
